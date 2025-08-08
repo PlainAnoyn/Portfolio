@@ -1,5 +1,60 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import Logo from '../assets/Logo.png';
+
+// Flip Animation Component
+const FlipNavItem = ({ children, onClick, delay = 0 }) => {
+  return (
+    <motion.div
+      className="flip-container"
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay }}
+      whileHover={{
+        y: -8,
+        transition: { duration: 0.3, ease: "easeOut" }
+      }}
+    >
+      <motion.div
+        className="flip-content"
+        whileHover={{
+          rotateX: 15,
+          scale: 1.05,
+          transition: { duration: 0.3, ease: "easeOut" }
+        }}
+      >
+        {children}
+      </motion.div>
+    </motion.div>
+  );
+};
+
+// Text Slide Animation Component
+const SlideTextNavItem = ({ label, hoverText, onClick, delay = 0 }) => {
+  return (
+    <motion.li
+      className="nav-item"
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay }}
+    >
+      <motion.button
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.95 }}
+        className="nav-link text-white fw-medium position-relative d-flex align-items-center gap-2 slide-text-container"
+        onClick={onClick}
+      >
+        <span className="slide-text-wrapper">
+          <span className="slide-text-original">{label}</span>
+          <span className="slide-text-hover" data-hover={hoverText || label}>
+            {hoverText || label}
+          </span>
+        </span>
+        <span className="nav-link-underline"></span>
+      </motion.button>
+    </motion.li>
+  );
+};
 
 const Navigation = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -23,10 +78,10 @@ const Navigation = () => {
   };
 
   const navItems = [
-    { id: 'home', label: 'Home', icon: '🏠' },
-    { id: 'about', label: 'About', icon: '👨‍💻' },
-    { id: 'projects', label: 'Projects', icon: '🚀' },
-    { id: 'contact', label: 'Contact', icon: '📧' },
+    { id: 'home', label: 'Home', hoverText: 'Home' },
+    { id: 'about', label: 'About', hoverText: 'About' },
+    { id: 'projects', label: 'Projects', hoverText: 'Projects' },
+    { id: 'contact', label: 'Contact', hoverText: 'Contact' },
   ];
 
   return (
@@ -41,11 +96,11 @@ const Navigation = () => {
         {/* Brand/Logo */}
         <motion.div
           whileHover={{ scale: 1.05 }}
-          className="navbar-brand gradient-text text-glow fw-bold fs-3"
+          className="navbar-brand d-flex align-items-center"
           onClick={() => scrollToSection('home')}
           style={{ cursor: 'pointer' }}
         >
-          Portfolio
+          <img src={Logo} alt="Site logo" style={{height: '56px', objectFit: 'contain', marginRight: '12px'}} />
         </motion.div>
 
         {/* Mobile Toggle Button */}
@@ -72,24 +127,13 @@ const Navigation = () => {
         <div className={`collapse navbar-collapse ${isMobileMenuOpen ? 'show' : ''}`} id="navbarNav">
           <ul className="navbar-nav ms-auto">
             {navItems.map((item, index) => (
-              <motion.li
+              <SlideTextNavItem
                 key={item.id}
-                className="nav-item"
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-              >
-                <motion.button
-                  whileHover={{ scale: 1.1, y: -2 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="nav-link text-white fw-medium position-relative d-flex align-items-center gap-2 flip-hover"
-                  onClick={() => scrollToSection(item.id)}
-                >
-                  <span className="d-none d-md-inline">{item.icon}</span>
-                  {item.label}
-                  <span className="nav-link-underline"></span>
-                </motion.button>
-              </motion.li>
+                label={item.label}
+                hoverText={item.hoverText}
+                onClick={() => scrollToSection(item.id)}
+                delay={index * 0.1}
+              />
             ))}
           </ul>
 
@@ -100,14 +144,16 @@ const Navigation = () => {
             transition={{ delay: 0.4 }}
             className="ms-lg-3 mt-3 mt-lg-0"
           >
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="btn btn-primary btn-sm"
-              onClick={() => scrollToSection('contact')}
-            >
-              Get In Touch
-            </motion.button>
+            <FlipNavItem delay={0.4}>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="btn btn-primary btn-sm"
+                onClick={() => scrollToSection('contact')}
+              >
+                Get In Touch
+              </motion.button>
+            </FlipNavItem>
           </motion.div>
         </div>
       </div>

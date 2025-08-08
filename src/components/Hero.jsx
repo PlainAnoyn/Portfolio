@@ -162,6 +162,13 @@ const Hero = () => {
     return () => clearInterval(timer);
   }, []);
 
+  // Convert stats object to array for mapping
+  const statsArray = [
+    { label: 'Years Experience', value: stats.experience },
+    { label: 'Projects Completed', value: stats.projects },
+    { label: 'Happy Clients', value: stats.clients }
+  ];
+
   return (
     <section id="home" className="section relative overflow-hidden">
       {/* Floating Particles */}
@@ -190,12 +197,14 @@ const Hero = () => {
             {/* Text Content */}
             <motion.div variants={itemVariants} className="space-y-8">
               <motion.div variants={itemVariants} className="mb-4">
-                <span className="badge badge-custom mb-3 px-4 py-3 fs-4 fw-bold">
+                <span className="badge badge-custom mb-3 px-4 py-3 fs-4 fw-bold" data-aos="fade-down" data-aos-delay="200">
                   👋 Hello, I'm
                 </span>
                 <motion.h1 
                   variants={itemVariants}
                   className="display-1 fw-bold text-white mb-3"
+                  data-aos="fade-up" 
+                  data-aos-delay="400"
                 >
                   <span className="gradient-text text-glow">{text}</span>
                   <span className="blinking-caret">|</span>
@@ -205,6 +214,8 @@ const Hero = () => {
               <motion.h2 
                 variants={itemVariants}
                 className="h2 text-gray-300 fw-medium mb-4"
+                data-aos="fade-up" 
+                data-aos-delay="600"
               >
                 Full Stack Developer & Creative Coder
               </motion.h2>
@@ -212,6 +223,8 @@ const Hero = () => {
               <motion.p 
                 variants={itemVariants}
                 className="lead text-gray-400 mb-5"
+                data-aos="fade-up" 
+                data-aos-delay="800"
               >
                 I create immersive digital experiences using cutting-edge technologies. 
                 Specializing in React, Three.js, and modern web development.
@@ -220,6 +233,8 @@ const Hero = () => {
               <motion.div 
                 variants={itemVariants}
                 className="d-flex flex-wrap gap-3 mb-3"
+                data-aos="fade-up" 
+                data-aos-delay="1000"
               >
                 <motion.button
                   whileHover={{ scale: 1.05 }}
@@ -244,6 +259,9 @@ const Hero = () => {
           <motion.div 
             variants={itemVariants}
             className="col-lg-6 col-md-12"
+            data-aos="fade-left" 
+            data-aos-delay="600"
+            data-aos-duration="1200"
           >
             <div className="position-relative" style={{ height: '700px' }}>
               <Canvas 
@@ -266,33 +284,25 @@ const Hero = () => {
         <motion.div 
           variants={itemVariants}
           className="row justify-content-center mt-3"
+          data-aos="fade-up" 
+          data-aos-delay="1200"
+          data-aos-duration="1000"
         >
           <div className="col-lg-8 col-md-10">
             <div className="row g-4">
-              <div className="col-4 text-center">
-                <div className="card card-custom border-0 p-3">
-                  <div className="card-body text-center">
-                    <div className="display-6 fw-bold gradient-text mb-2">{stats.experience}+</div>
-                    <div className="text-muted small">Years Experience</div>
+              {statsArray.map((stat, index) => (
+                <div key={stat.label} className="col-md-4">
+                  <div 
+                    className="text-center p-4 rounded glass-effect"
+                    data-aos="zoom-in" 
+                    data-aos-delay={1400 + (index * 200)}
+                    data-aos-duration="800"
+                  >
+                    <div className="display-6 fw-bold gradient-text mb-2">{stat.value}+</div>
+                    <div className="text-gray-400 fw-medium">{stat.label}</div>
                   </div>
                 </div>
-              </div>
-              <div className="col-4 text-center">
-                <div className="card card-custom border-0 p-3">
-                  <div className="card-body text-center">
-                    <div className="display-6 fw-bold gradient-text mb-2">{stats.projects}+</div>
-                    <div className="text-muted small">Projects Completed</div>
-                  </div>
-                </div>
-              </div>
-              <div className="col-4 text-center">
-                <div className="card card-custom border-0 p-3">
-                  <div className="card-body text-center">
-                    <div className="display-6 fw-bold gradient-text mb-2">{stats.clients}+</div>
-                    <div className="text-muted small">Happy Clients</div>
-                  </div>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         </motion.div>

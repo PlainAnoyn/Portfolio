@@ -1,118 +1,220 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import SiddharthaLogo from '../assets/Siddhartha .png';
+import ItahariLogo from '../assets/Itahari international collage.png';
+import LondonMetLogo from '../assets/londonmet-logo.svg';
+
+// Import tech images
+import CSSImage from '../assets/tech/css.png';
+import FigmaImage from '../assets/tech/figma.png';
+import GitImage from '../assets/tech/git.png';
+import HTMLImage from '../assets/tech/html.png';
+import JavaScriptImage from '../assets/tech/javascript.png';
+import MongoDBImage from '../assets/tech/mongodb.png';
+import NodeJSImage from '../assets/tech/nodejs.png';
+import ReactJSImage from '../assets/tech/reactjs.png';
+import TailwindImage from '../assets/tech/tailwind.png';
+import ThreeJSImage from '../assets/tech/threejs.svg';
+import TypeScriptImage from '../assets/tech/typescript.png';
 
 const About = () => {
+  const [selectedCertificate, setSelectedCertificate] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+
+  const handleViewCertificate = (cert) => {
+    setSelectedCertificate(cert);
+    setShowModal(true);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setSelectedCertificate(null);
+  };
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
       transition: {
-        duration: 1,
-        staggerChildren: 0.2,
-      },
-    },
+        staggerChildren: 0.3
+      }
+    }
   };
 
   const itemVariants = {
-    hidden: { y: 50, opacity: 0 },
+    hidden: { opacity: 0, y: 50 },
     visible: {
-      y: 0,
       opacity: 1,
+      y: 0,
       transition: {
-        duration: 0.8,
-        ease: "easeOut",
-      },
-    },
+        duration: 0.8
+      }
+    }
   };
 
   const skills = [
-    { name: "React.js", icon: "⚛️", level: 90 },
-    { name: "JavaScript", icon: "🟨", level: 85 },
-    { name: "TypeScript", icon: "🔷", level: 80 },
-    { name: "Node.js", icon: "🟢", level: 85 },
-    { name: "Python", icon: "🐍", level: 75 },
-    { name: "Three.js", icon: "🎨", level: 80 },
-    { name: "HTML/CSS", icon: "🎨", level: 95 },
-    { name: "Git", icon: "📝", level: 85 }
-  ];
-
-  const technologies = [
-    { name: "React", icon: "⚛️", category: "Frontend" },
-    { name: "Vue.js", icon: "🟢", category: "Frontend" },
-    { name: "Angular", icon: "🔴", category: "Frontend" },
-    { name: "Node.js", icon: "🟢", category: "Backend" },
-    { name: "Express.js", icon: "⚡", category: "Backend" },
-    { name: "MongoDB", icon: "🍃", category: "Database" },
-    { name: "PostgreSQL", icon: "🐘", category: "Database" },
-    { name: "Docker", icon: "🐳", category: "DevOps" },
-    { name: "AWS", icon: "☁️", category: "Cloud" },
-    { name: "Firebase", icon: "🔥", category: "Backend" },
-    { name: "Three.js", icon: "🎨", category: "3D" },
-    { name: "Framer Motion", icon: "🎭", category: "Animation" }
+    {
+      name: 'CSS',
+      image: CSSImage,
+      category: 'Styling'
+    },
+    {
+      name: 'Figma',
+      image: FigmaImage,
+      category: 'Design'
+    },
+    {
+      name: 'Git',
+      image: GitImage,
+      category: 'Version Control'
+    },
+    {
+      name: 'HTML',
+      image: HTMLImage,
+      category: 'Markup'
+    },
+    {
+      name: 'JavaScript',
+      image: JavaScriptImage,
+      category: 'Programming'
+    },
+    {
+      name: 'MongoDB',
+      image: MongoDBImage,
+      category: 'Database'
+    },
+    {
+      name: 'Node.js',
+      image: NodeJSImage,
+      category: 'Backend'
+    },
+    {
+      name: 'React.js',
+      image: ReactJSImage,
+      category: 'Frontend'
+    },
+    {
+      name: 'Tailwind',
+      image: TailwindImage,
+      category: 'CSS Framework'
+    },
+    {
+      name: 'Three.js',
+      image: ThreeJSImage,
+      category: '3D Graphics'
+    },
+    {
+      name: 'TypeScript',
+      image: TypeScriptImage,
+      category: 'Programming'
+    }
   ];
 
   const experience = [
     {
-      title: "Senior Full Stack Developer",
-      company: "TechCorp Inc.",
-      period: "2022 - Present",
-      description: "Led development of scalable web applications using React, Node.js, and cloud technologies.",
-      icon: "💼"
+      title: 'Full Stack Developer',
+      company: 'Tech Solutions Inc.',
+      period: '2023 - Present',
+      location: 'Remote',
+      description: 'Leading development of modern web applications using React, Node.js, and cloud technologies. Implemented responsive designs and optimized performance.',
+      technologies: ['React', 'Node.js', 'MongoDB', 'AWS', 'TypeScript'],
+      icon: '💼'
     },
     {
-      title: "Frontend Developer",
-      company: "Digital Solutions",
-      period: "2020 - 2022",
-      description: "Built responsive user interfaces and implemented modern design patterns.",
-      icon: "🎨"
+      title: 'Frontend Developer',
+      company: 'Digital Creations',
+      period: '2022 - 2023',
+      location: 'Kathmandu, Nepal',
+      description: 'Specialized in creating responsive and interactive user interfaces with React and Three.js. Collaborated with design teams to implement pixel-perfect designs.',
+      technologies: ['React', 'Three.js', 'CSS3', 'JavaScript', 'Figma'],
+      icon: '🎨'
     },
     {
-      title: "Junior Developer",
-      company: "StartUp Hub",
-      period: "2019 - 2020",
-      description: "Developed features for web applications and collaborated with cross-functional teams.",
-      icon: "🚀"
+      title: 'Junior Developer',
+      company: 'StartUp Hub',
+      period: '2021 - 2022',
+      location: 'Remote',
+      description: 'Contributed to various projects involving web development and 3D graphics programming. Developed features for client applications and maintained code quality.',
+      technologies: ['JavaScript', 'HTML/CSS', 'Git', 'Three.js', 'Node.js'],
+      icon: '🚀'
     }
   ];
 
   const education = [
     {
-      institution: "Tribhuvan University",
-      degree: "Bachelors of Science in Computer Science",
-      period: "March 2021 - April 2025",
-      location: "New Summit College, Shantinagar, Kathmandu",
-      logo: "🎓" // Will be replaced with actual logo
+      institution: "London Metropolitan University",
+      degree: "BSc (Hons) Computer Science",
+      period: "2023 - Present",
+      location: "Affiliated through Itahari International College",
+      logo: LondonMetLogo,
+      description: "Pursuing Bachelor's degree in Computer Science with focus on software development and modern technologies."
     },
     {
-      institution: "Arniko College",
-      degree: "+2 Science",
-      period: "August 2018 - December 2020",
-      location: "Biratnagar, Morang",
-      logo: "📚" // Will be replaced with actual logo
+      institution: "Itahari International College",
+      degree: "BSc (Hons) Computer Science",
+      period: "2023 - Present",
+      location: "Itahari, Nepal",
+      logo: ItahariLogo,
+      description: "Studying Computer Science with emphasis on programming, web development, and software engineering."
+    },
+    {
+      institution: "Siddhartha Boarding Secondary School",
+      degree: "+2 Management (Computer Science)",
+      period: "2021 - 2023",
+      location: "Nepal",
+      logo: SiddharthaLogo,
+      description: "Completed higher secondary education with focus on computer science and management studies."
     }
   ];
 
   const certifications = [
     {
-      title: "Full Stack Web Development",
-      issuer: "FreeCodeCamp",
-      date: "2023",
-      description: "Comprehensive certification covering HTML, CSS, JavaScript, React, Node.js, and databases.",
-      logo: "🏆"
+      name: 'React Development',
+      issuer: 'Meta',
+      date: '2024',
+      icon: '⚛️',
+      description: 'Advanced React development and modern web applications',
+      image: null // Will be replaced with actual certificate image
     },
     {
-      title: "React Developer Certification",
-      issuer: "Meta (Facebook)",
-      date: "2023",
-      description: "Advanced React concepts including hooks, context, state management, and performance optimization.",
-      logo: "⚛️"
+      name: 'Three.js Mastery',
+      issuer: 'Three.js Academy',
+      date: '2024',
+      icon: '🎮',
+      description: '3D web development and interactive graphics',
+      image: null
     },
     {
-      title: "JavaScript Algorithms and Data Structures",
-      issuer: "FreeCodeCamp",
-      date: "2022",
-      description: "In-depth study of JavaScript fundamentals, ES6+, algorithms, and data structures.",
-      logo: "💻"
+      name: 'Full Stack Development',
+      issuer: 'MERN Stack',
+      date: '2023',
+      icon: '🔄',
+      description: 'Complete web development with MongoDB, Express, React, Node.js',
+      image: null
+    },
+    {
+      name: 'UI/UX Design',
+      issuer: 'Google',
+      date: '2023',
+      icon: '🎨',
+      description: 'User interface and experience design principles',
+      image: null
+    },
+    {
+      name: 'JavaScript Algorithms',
+      issuer: 'FreeCodeCamp',
+      date: '2023',
+      icon: '💻',
+      description: 'Advanced JavaScript algorithms and data structures',
+      image: null
+    },
+    {
+      name: 'Python Programming',
+      issuer: 'Coursera',
+      date: '2023',
+      icon: '🐍',
+      description: 'Python programming and software development',
+      image: null
     }
   ];
 
@@ -127,10 +229,10 @@ const About = () => {
           className="row"
         >
           <div className="col-lg-12 text-center mb-5">
-            <motion.h2 variants={itemVariants} className="display-4 fw-bold text-white mb-3">
+            <motion.h2 variants={itemVariants} className="display-4 fw-bold text-white mb-3" data-aos="fade-down">
               About <span className="gradient-text">Me</span>
             </motion.h2>
-            <motion.p variants={itemVariants} className="lead text-gray-400">
+            <motion.p variants={itemVariants} className="lead text-gray-400" data-aos="fade-up" data-aos-delay="200">
               Passionate developer creating innovative digital experiences
             </motion.p>
           </div>
@@ -145,214 +247,341 @@ const About = () => {
             viewport={{ once: true }}
             className="col-lg-12"
           >
-            <motion.div 
-              variants={itemVariants} 
+            <motion.div
+              variants={itemVariants}
               className="card-wrapper position-relative"
             >
               <div className="card card-custom border-0 h-100">
-              <div className="card-body p-4">
-                <motion.h3 
-                  variants={itemVariants}
-                  className="h4 fw-bold text-white mb-4 d-flex align-items-center"
-                >
-                  <span className="gradient-text me-3 fs-2">💪</span> 
-                  <span>Skills & Expertise</span>
-                </motion.h3>
-                <div className="space-y-4">
-                  {skills.map((skill, index) => (
-                    <motion.div
-                      key={skill.name}
-                      variants={itemVariants}
-                      className="skill-item"
-                      initial={{ opacity: 0, x: -50 }}
-                      whileInView={{ 
-                        opacity: 1, 
-                        x: 0,
-                        transition: { 
-                          duration: 0.5, 
-                          delay: index * 0.1 
-                        }
-                      }}
-                      viewport={{ once: true }}
-                    >
-                      <div className="d-flex align-items-center mb-2 p-3 rounded skill-header">
-                        <motion.span 
-                          className="me-3 fs-3 skill-icon"
-                          whileHover={{ 
-                            rotate: 360,
-                            scale: 1.2,
-                            transition: { duration: 0.5 }
-                          }}
-                        >
-                          {skill.icon}
-                        </motion.span>
-                        <span className="text-white fw-medium fs-6">{skill.name}</span>
-                        <motion.span 
-                          className="ms-auto text-muted fw-bold"
-                          initial={{ opacity: 0 }}
-                          whileInView={{ 
-                            opacity: 1,
-                            transition: { delay: index * 0.1 + 0.5 }
-                          }}
-                          viewport={{ once: true }}
-                        >
-                          {skill.level}%
-                        </motion.span>
-                      </div>
-                      <div className="progress skill-progress position-relative">
+                <div className="card-body p-4">
+                  <motion.h3
+                    variants={itemVariants}
+                    className="h4 fw-bold text-white mb-4 d-flex align-items-center"
+                    data-aos="fade-right"
+                  >
+                    <span className="gradient-text me-3 fs-2">💪</span>
+                    <span>Skills & Expertise</span>
+                  </motion.h3>
+                  <div className="space-y-4">
+                    <div className="row g-4 justify-content-center">
+                      {skills.map((skill, index) => (
                         <motion.div
-                          className="progress-bar"
-                          initial={{ width: 0 }}
-                          whileInView={{ 
-                            width: `${skill.level}%`,
-                            transition: { 
-                              duration: 1.5, 
-                              delay: index * 0.1 + 0.3,
-                              ease: "easeOut"
+                          key={skill.name}
+                          variants={itemVariants}
+                          className="col-lg-2 col-md-3 col-sm-4 col-6"
+                          initial={{ opacity: 0, y: 50 }}
+                          whileInView={{
+                            opacity: 1,
+                            y: 0,
+                            transition: {
+                              duration: 0.5,
+                              delay: index * 0.1
                             }
                           }}
                           viewport={{ once: true }}
-                          style={{
-                            background: `linear-gradient(90deg, #667eea 0%, #764ba2 50%, #f093fb 100%)`,
-                            boxShadow: '0 0 10px rgba(102, 126, 234, 0.5)'
-                          }}
-                        ></motion.div>
-                        <motion.div
-                          className="progress-glow"
-                          initial={{ opacity: 0 }}
-                          whileInView={{ 
-                            opacity: 1,
-                            transition: { delay: index * 0.1 + 1.5 }
-                          }}
-                          viewport={{ once: true }}
-                        ></motion.div>
-                      </div>
-                    </motion.div>
-                  ))}
+                          data-aos="zoom-in"
+                          data-aos-delay={index * 100}
+                          data-aos-duration="800"
+                        >
+                          <div className="skill-icon-clean text-center p-3">
+                            <div className="skill-icon-octagon mb-2">
+                              <img src={skill.image} alt={skill.name} className="img-fluid" style={{ maxHeight: '40px', width: 'auto' }} />
+                            </div>
+                            <h6 className="text-white mb-0 small">{skill.name}</h6>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
+          </motion.div>
+
+          {/* Work Experience Section */}
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            className="col-lg-12 mt-5"
+          >
+            <motion.div
+              variants={itemVariants}
+              className="card-wrapper position-relative"
+            >
+              <div className="card card-custom border-0 h-100">
+                <div className="card-body p-4">
+                  <motion.h3
+                    variants={itemVariants}
+                    className="h4 fw-bold text-white mb-4 d-flex align-items-center"
+                    data-aos="fade-right"
+                  >
+                    <span className="gradient-text me-3 fs-2">💼</span>
+                    <span>Work Experience</span>
+                  </motion.h3>
+                  <div className="experience-timeline">
+                    {experience.map((exp, index) => (
+                      <motion.div
+                        key={exp.title}
+                        variants={itemVariants}
+                        className="experience-item"
+                        initial={{ opacity: 0, x: -50 }}
+                        whileInView={{
+                          opacity: 1,
+                          x: 0,
+                          transition: {
+                            duration: 0.5,
+                            delay: index * 0.1
+                          }
+                        }}
+                        viewport={{ once: true }}
+                        data-aos="fade-left"
+                        data-aos-delay={index * 100}
+                        data-aos-duration="800"
+                      >
+                        <div className="experience-card p-4 rounded mb-4">
+                          <div className="experience-header mb-3">
+                            <div className="d-flex align-items-center mb-2">
+                              <div className="experience-icon me-3">
+                                <span className="fs-3">{exp.icon}</span>
+                              </div>
+                              <div>
+                                <h5 className="text-white mb-1 fw-bold">{exp.title}</h5>
+                                <h6 className="text-primary mb-1">{exp.company}</h6>
+                              </div>
+                            </div>
+                            <div className="experience-meta d-flex align-items-center gap-3 mb-3">
+                              <span className="text-muted small">
+                                <i className="fas fa-calendar me-1"></i>
+                                {exp.period}
+                              </span>
+                              <span className="text-muted small">
+                                <i className="fas fa-map-marker-alt me-1"></i>
+                                {exp.location}
+                              </span>
+                            </div>
+                          </div>
+                          <p className="text-gray-400 mb-0">{exp.description}</p>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+
+          {/* Education Section */}
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            className="col-lg-12 mt-5"
+          >
+            <motion.div
+              variants={itemVariants}
+              className="card-wrapper position-relative"
+            >
+              <div className="card card-custom border-0 h-100">
+                <div className="card-body p-4">
+                  <motion.h3
+                    variants={itemVariants}
+                    className="h4 fw-bold text-white mb-4 d-flex align-items-center"
+                    data-aos="fade-right"
+                  >
+                    <span className="gradient-text me-3 fs-2">🎓</span>
+                    <span>Education</span>
+                  </motion.h3>
+                  <div className="education-timeline">
+                    {education.map((edu, index) => (
+                      <motion.div
+                        key={edu.institution}
+                        variants={itemVariants}
+                        className="education-item"
+                        initial={{ opacity: 0, x: -50 }}
+                        whileInView={{
+                          opacity: 1,
+                          x: 0,
+                          transition: {
+                            duration: 0.5,
+                            delay: index * 0.1
+                          }
+                        }}
+                        viewport={{ once: true }}
+                        data-aos="fade-left"
+                        data-aos-delay={index * 100}
+                        data-aos-duration="800"
+                      >
+                        <div className="row align-items-center">
+                          <div className="col-md-2">
+                            <div className="logo-container">
+                              <img 
+                                src={edu.logo} 
+                                alt={`${edu.institution} logo`} 
+                                className="img-fluid" 
+                                style={{ maxHeight: '50px', width: 'auto' }} 
+                              />
+                            </div>
+                          </div>
+                          <div className="col-md-10">
+                            <h5 className="text-white mb-1">{edu.degree}</h5>
+                            <p className="text-muted mb-2">{edu.period}</p>
+                            <p className="text-gray-400 mb-0">{edu.description}</p>
+                          </div>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+
+          {/* Certifications Section */}
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            className="col-lg-12 mt-5"
+          >
+            <motion.div
+              variants={itemVariants}
+              className="card-wrapper position-relative"
+            >
+              <div className="card card-custom border-0 h-100">
+                <div className="card-body p-4">
+                  <motion.h3
+                    variants={itemVariants}
+                    className="h4 fw-bold text-white mb-4 d-flex align-items-center"
+                    data-aos="fade-right"
+                  >
+                    <span className="gradient-text me-3 fs-2">🏆</span>
+                    <span>Certifications</span>
+                  </motion.h3>
+                  <div className="row g-4">
+                    {certifications.map((cert, index) => (
+                      <motion.div
+                        key={cert.name}
+                        variants={itemVariants}
+                        className="col-lg-4 col-md-6"
+                        initial={{ opacity: 0, y: 50 }}
+                        whileInView={{
+                          opacity: 1,
+                          y: 0,
+                          transition: {
+                            duration: 0.5,
+                            delay: index * 0.1
+                          }
+                        }}
+                        viewport={{ once: true }}
+                        data-aos="zoom-in"
+                        data-aos-delay={index * 100}
+                        data-aos-duration="800"
+                      >
+                        <div className="certification-card p-4 rounded h-100 position-relative overflow-hidden">
+                          {/* Certificate Image Placeholder */}
+                          <div className="certificate-image-container mb-3">
+                            {cert.image ? (
+                              <img 
+                                src={cert.image} 
+                                alt={`${cert.name} certificate`}
+                                className="certificate-image w-100 rounded"
+                                style={{ height: '200px', objectFit: 'cover' }}
+                              />
+                            ) : (
+                              <div className="certificate-placeholder d-flex align-items-center justify-content-center rounded"
+                                   style={{ 
+                                     height: '200px', 
+                                     background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1))',
+                                     border: '2px dashed rgba(102, 126, 234, 0.3)'
+                                   }}>
+                                <div className="text-center">
+                                  <div className="fs-1 mb-2">{cert.icon}</div>
+                                  <small className="text-muted">Certificate Image</small>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Certificate Content */}
+                          <div className="certificate-content">
+                            <div className="d-flex align-items-center justify-content-between mb-2">
+                              <h5 className="text-white mb-0 fw-bold">{cert.name}</h5>
+                              <span className="badge bg-primary">{cert.date}</span>
+                            </div>
+                            <p className="text-primary mb-2 fw-medium">{cert.issuer}</p>
+                            <p className="text-gray-400 small mb-3">{cert.description}</p>
+                            
+                            {/* Certificate Actions */}
+                            <div className="certificate-actions d-flex gap-2">
+                              <button 
+                                className="btn btn-sm btn-outline-primary"
+                                onClick={() => handleViewCertificate(cert)}
+                              >
+                                <i className="fas fa-eye me-1"></i> View
+                              </button>
+                              <button className="btn btn-sm btn-outline-secondary">
+                                <i className="fas fa-download me-1"></i> Download
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </motion.div>
           </motion.div>
         </div>
-
-        {/* Experience Section */}
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          className="row mt-5"
-        >
-          <div className="col-lg-12">
-            <motion.h2 variants={itemVariants} className="h2 fw-bold text-white mb-4 text-center">
-              <span className="gradient-text">💼 Work</span> Experience
-            </motion.h2>
-            <div className="row g-4">
-              {experience.map((exp, index) => (
-                <motion.div
-                  key={index}
-                  variants={itemVariants}
-                  className="col-lg-4 col-md-6"
-                >
-                  <div className="card card-custom border-0 h-100">
-                    <div className="card-body p-4">
-                      <div className="d-flex align-items-center mb-3">
-                        <span className="me-3 fs-3">{exp.icon}</span>
-                        <div>
-                          <h5 className="text-white fw-bold mb-1">{exp.title}</h5>
-                          <p className="text-muted mb-0">{exp.company}</p>
-                        </div>
-                      </div>
-                      <p className="text-muted small mb-3">{exp.period}</p>
-                      <p className="text-gray-400 small">{exp.description}</p>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Education Section */}
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          className="row mt-5"
-        >
-          <div className="col-lg-12">
-            <motion.h2 variants={itemVariants} className="h2 fw-bold text-white mb-4 text-center">
-              🎓 Education
-            </motion.h2>
-            <div className="education-timeline">
-              {education.map((edu, index) => (
-                <motion.div
-                  key={index}
-                  variants={itemVariants}
-                  className="education-item d-flex align-items-start mb-5"
-                >
-                  {/* Logo */}
-                  <div className="education-logo me-4 flex-shrink-0">
-                    <div className="logo-container">
-                      <span className="fs-1">{edu.logo}</span>
-                    </div>
-                  </div>
-                  
-                  {/* Content */}
-                  <div className="education-content flex-grow-1">
-                    <h4 className="text-white fw-bold mb-1">{edu.institution}</h4>
-                    <h5 className="text-muted mb-2">{edu.degree}</h5>
-                    <p className="text-muted small mb-1">{edu.period}</p>
-                    <p className="text-gray-400 small mb-0">{edu.location}</p>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Certification Section - Simplified */}
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          className="row mt-5"
-        >
-          <div className="col-lg-12">
-            <motion.h2 variants={itemVariants} className="h2 fw-bold text-white mb-4 text-center">
-              📜 My Certifications
-            </motion.h2>
-            <div className="row g-4">
-              {certifications.map((cert, index) => (
-                <motion.div
-                  key={index}
-                  variants={itemVariants}
-                  className="col-lg-4 col-md-6"
-                >
-                  <div className="card card-custom border-0 h-100">
-                    <div className="card-body p-4">
-                      <div className="d-flex align-items-center mb-3">
-                        <span className="me-3 fs-3">{cert.logo}</span>
-                        <div>
-                          <h5 className="text-white fw-bold mb-1">{cert.title}</h5>
-                          <p className="text-muted mb-0">{cert.issuer}</p>
-                        </div>
-                      </div>
-                      <p className="text-muted small mb-3">{cert.date}</p>
-                      <p className="text-gray-400 small">{cert.description}</p>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </motion.div>
       </div>
+
+      {/* Certificate Modal */}
+      {showModal && selectedCertificate && (
+        <div className="certificate-modal-overlay" onClick={closeModal}>
+          <div className="certificate-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="certificate-modal-header">
+              <h4 className="text-white mb-0">{selectedCertificate.name}</h4>
+              <button className="btn-close btn-close-white" onClick={closeModal}></button>
+            </div>
+            <div className="certificate-modal-body">
+              {selectedCertificate.image ? (
+                <img 
+                  src={selectedCertificate.image} 
+                  alt={`${selectedCertificate.name} certificate`}
+                  className="certificate-modal-image w-100 rounded"
+                />
+              ) : (
+                <div className="certificate-modal-placeholder d-flex align-items-center justify-content-center rounded"
+                     style={{ 
+                       height: '400px', 
+                       background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1))',
+                       border: '2px dashed rgba(102, 126, 234, 0.3)'
+                     }}>
+                  <div className="text-center">
+                    <div className="fs-1 mb-3">{selectedCertificate.icon}</div>
+                    <h5 className="text-white mb-2">{selectedCertificate.name}</h5>
+                    <p className="text-muted">Certificate image will be displayed here</p>
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="certificate-modal-footer">
+              <div className="d-flex justify-content-between align-items-center">
+                <div>
+                  <p className="text-primary mb-1 fw-medium">{selectedCertificate.issuer}</p>
+                  <p className="text-muted mb-0">{selectedCertificate.description}</p>
+                </div>
+                <span className="badge bg-primary fs-6">{selectedCertificate.date}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 };
 
-export default About; 
+export default About;

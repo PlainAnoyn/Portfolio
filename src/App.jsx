@@ -1,35 +1,726 @@
-import React, { Suspense, useRef } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls } from '@react-three/drei';
+import React, { Suspense, useRef, useEffect, lazy, useMemo, useState } from 'react';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { OrbitControls, useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
-import Hero from './components/Hero';
-import About from './components/About';
-import Projects from './components/Projects';
-import Contact from './components/Contact';
-import Navigation from './components/Navigation';
+import AOS from 'aos';
+import 'aos/dist/aos.css';
+import { motion } from 'framer-motion';
 
-// Custom Stars component with smooth upward movement
-function SmoothStars() {
-  const starsRef = useRef();
-  
-  useFrame(() => {
-    if (starsRef.current) {
-      starsRef.current.position.y += 0.01; // Slow upward movement
-      if (starsRef.current.position.y > 50) {
-        starsRef.current.position.y = -50; // Reset to bottom when reaching top
-      }
+// Lazy load components
+const Navigation = lazy(() => import('./components/Navigation'));
+const Hero = lazy(() => import('./components/Hero'));
+const About = lazy(() => import('./components/About'));
+const Projects = lazy(() => import('./components/Projects'));
+const Contact = lazy(() => import('./components/Contact'));
+
+// Loading Spinner Component
+const LoadingSpinner = () => (
+  <div className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
+    <div className="spinner-border text-primary" role="status">
+      <span className="visually-hidden">Loading...</span>
+    </div>
+  </div>
+);
+
+// Advanced Shooting Stars with Trails
+function ShootingStarTrails() {
+  const groupRef = useRef();
+  const [scrollProgress, setScrollProgress] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = scrollTop / scrollHeight;
+      setScrollProgress(progress);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const shootingStars = useMemo(() => {
+    return Array.from({ length: 8 }).map(() => ({
+      position: [
+        (Math.random() - 0.5) * 100,
+        (Math.random() - 0.5) * 100,
+        (Math.random() - 0.5) * 100
+      ],
+      velocity: [
+        (Math.random() - 0.5) * 0.03,
+        (Math.random() - 0.5) * 0.03,
+        (Math.random() - 0.5) * 0.03
+      ],
+      trail: [],
+      maxTrailLength: 15 + Math.random() * 10,
+      size: 1 + Math.random() * 3,
+      color: new THREE.Color().setHSL(Math.random() * 0.2 + 0.4, 0.9, 0.8),
+      life: Math.random() * 50,
+      maxLife: 100 + Math.random() * 150
+    }));
+  }, []);
+
+  useFrame((state) => {
+    if (groupRef.current) {
+      groupRef.current.children.forEach((starGroup, index) => {
+        const starData = shootingStars[index];
+        
+        // Update position
+        starData.position[0] += starData.velocity[0];
+        starData.position[1] += starData.velocity[1];
+        starData.position[2] += starData.velocity[2];
+        
+        // Scroll-based movement
+        starData.position[2] -= scrollProgress * 0.8;
+        
+        // Add to trail
+        starData.trail.push([...starData.position]);
+        if (starData.trail.length > starData.maxTrailLength) {
+          starData.trail.shift();
+        }
+        
+        // Life cycle
+        starData.life++;
+        if (starData.life > starData.maxLife) {
+          // Reset star
+          starData.life = 0;
+          starData.position = [
+            (Math.random() - 0.5) * 100,
+            (Math.random() - 0.5) * 100,
+            (Math.random() - 0.5) * 100
+          ];
+          starData.velocity = [
+            (Math.random() - 0.5) * 0.03,
+            (Math.random() - 0.5) * 0.03,
+            (Math.random() - 0.5) * 0.03
+          ];
+          starData.trail = [];
+        }
+        
+        // Wrap around boundaries
+        if (Math.abs(starData.position[0]) > 50) starData.velocity[0] *= -1;
+        if (Math.abs(starData.position[1]) > 50) starData.velocity[1] *= -1;
+        if (Math.abs(starData.position[2]) > 50) starData.velocity[2] *= -1;
+        
+        // Update main star
+        const mainStar = starGroup.children[0];
+        mainStar.position.set(...starData.position);
+        
+        // Scale and opacity based on life and scroll
+        const lifeScale = 1 - (starData.life / starData.maxLife);
+        const scrollScale = 1 + scrollProgress * 3;
+        const scale = starData.size * lifeScale * scrollScale;
+        mainStar.scale.setScalar(scale);
+        
+        // Update trail particles
+        starData.trail.forEach((trailPos, trailIndex) => {
+          if (starGroup.children[trailIndex + 1]) {
+            const trailParticle = starGroup.children[trailIndex + 1];
+            trailParticle.position.set(...trailPos);
+            
+            // Trail opacity decreases over time
+            const trailOpacity = (trailIndex / starData.trail.length) * 0.6;
+            trailParticle.material.opacity = trailOpacity;
+            
+            // Trail scale decreases over time
+            const trailScale = scale * (trailIndex / starData.trail.length) * 0.5;
+            trailParticle.scale.setScalar(trailScale);
+          }
+        });
+        
+        // Hide unused trail particles
+        for (let i = starData.trail.length + 1; i < starGroup.children.length; i++) {
+          starGroup.children[i].material.opacity = 0;
+        }
+      });
     }
   });
 
+  return (
+    <group ref={groupRef}>
+      {shootingStars.map((star, index) => (
+        <group key={index}>
+          {/* Main shooting star */}
+          <mesh position={star.position}>
+            <sphereGeometry args={[1, 8, 8]} />
+            <meshBasicMaterial
+              color={star.color}
+              transparent
+              opacity={0.9}
+              depthWrite={false}
+            />
+          </mesh>
+          {/* Trail particles */}
+          {Array.from({ length: 20 }).map((_, trailIndex) => (
+            <mesh key={trailIndex} position={[0, 0, 0]}>
+              <sphereGeometry args={[0.5, 4, 4]} />
+              <meshBasicMaterial
+                color={star.color}
+                transparent
+                opacity={0}
+                depthWrite={false}
+              />
+            </mesh>
+          ))}
+        </group>
+      ))}
+    </group>
+  );
+}
+
+// Shooting Stars Component
+function ShootingStars() {
+  const groupRef = useRef();
+  const [scrollProgress, setScrollProgress] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = scrollTop / scrollHeight;
+      setScrollProgress(progress);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const shootingStars = useMemo(() => {
+    return Array.from({ length: 15 }).map(() => ({
+      position: [
+        (Math.random() - 0.5) * 80,
+        (Math.random() - 0.5) * 80,
+        (Math.random() - 0.5) * 80
+      ],
+      velocity: [
+        (Math.random() - 0.5) * 0.02,
+        (Math.random() - 0.5) * 0.02,
+        (Math.random() - 0.5) * 0.02
+      ],
+      size: 0.5 + Math.random() * 2,
+      trailLength: 10 + Math.random() * 20,
+      color: new THREE.Color().setHSL(Math.random() * 0.1 + 0.5, 0.8, 0.9),
+      life: Math.random() * 100,
+      maxLife: 100 + Math.random() * 200
+    }));
+  }, []);
+
+  useFrame((state) => {
+    if (groupRef.current) {
+      groupRef.current.children.forEach((star, index) => {
+        const starData = shootingStars[index];
+        
+        // Update position
+        star.position.x += starData.velocity[0];
+        star.position.y += starData.velocity[1];
+        star.position.z += starData.velocity[2];
+        
+        // Scroll-based movement - shooting stars move faster as we dive
+        star.position.z -= scrollProgress * 0.6;
+        
+        // Life cycle
+        starData.life++;
+        if (starData.life > starData.maxLife) {
+          // Reset star
+          starData.life = 0;
+          star.position.set(
+            (Math.random() - 0.5) * 80,
+            (Math.random() - 0.5) * 80,
+            (Math.random() - 0.5) * 80
+          );
+          starData.velocity = [
+            (Math.random() - 0.5) * 0.02,
+            (Math.random() - 0.5) * 0.02,
+            (Math.random() - 0.5) * 0.02
+          ];
+        }
+        
+        // Wrap around boundaries
+        if (Math.abs(star.position.x) > 40) starData.velocity[0] *= -1;
+        if (Math.abs(star.position.y) > 40) starData.velocity[1] *= -1;
+        if (Math.abs(star.position.z) > 40) starData.velocity[2] *= -1;
+        
+        // Scale based on life and scroll
+        const lifeScale = 1 - (starData.life / starData.maxLife);
+        const scrollScale = 1 + scrollProgress * 2;
+        const scale = starData.size * lifeScale * scrollScale;
+        star.scale.setScalar(scale);
+        
+        // Opacity based on life
+        const material = star.material;
+        if (material) {
+          material.opacity = lifeScale * 0.8;
+        }
+      });
+    }
+  });
+
+  return (
+    <group ref={groupRef}>
+      {shootingStars.map((star, index) => (
+        <mesh key={index} position={star.position}>
+          <sphereGeometry args={[1, 8, 8]} />
+          <meshBasicMaterial
+            color={star.color}
+            transparent
+            opacity={0.8}
+            depthWrite={false}
+          />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
+// Deep Space Nebula Component
+function DeepSpaceNebula() {
+  const groupRef = useRef();
+  const [scrollProgress, setScrollProgress] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = scrollTop / scrollHeight;
+      setScrollProgress(progress);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const nebulaParticles = useMemo(() => {
+    return Array.from({ length: 50 }).map(() => ({
+      position: [
+        (Math.random() - 0.5) * 100,
+        (Math.random() - 0.5) * 100,
+        (Math.random() - 0.5) * 100
+      ],
+      size: 2 + Math.random() * 8,
+      color: new THREE.Color().setHSL(0.6 + Math.random() * 0.2, 0.8, 0.6),
+      speed: 0.1 + Math.random() * 0.3
+    }));
+  }, []);
+
+  useFrame((state) => {
+    if (groupRef.current) {
+      groupRef.current.children.forEach((particle, index) => {
+        const particleData = nebulaParticles[index];
+        
+        // Move particles away as we dive deeper
+        particle.position.z -= scrollProgress * 0.8;
+        if (particle.position.z < -50) {
+          particle.position.z = 50;
+        }
+        
+        // Gentle floating movement
+        particle.position.y += Math.sin(state.clock.getElapsedTime() * particleData.speed) * 0.01;
+        
+        // Scale based on scroll depth
+        const scale = particleData.size * (1 + scrollProgress * 2);
+        particle.scale.setScalar(scale);
+        
+        // Opacity based on scroll depth
+        const material = particle.material;
+        if (material) {
+          material.opacity = 0.1 + scrollProgress * 0.4;
+        }
+      });
+    }
+  });
+
+  return (
+    <group ref={groupRef}>
+      {nebulaParticles.map((particle, index) => (
+        <mesh key={index} position={particle.position}>
+          <sphereGeometry args={[1, 8, 8]} />
+          <meshBasicMaterial
+            color={particle.color}
+            transparent
+            opacity={0.1}
+            depthWrite={false}
+          />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
+// Scroll-Reactive Fog Component
+function ScrollFog() {
+  const { scene } = useThree();
+  const [scrollProgress, setScrollProgress] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = scrollTop / scrollHeight;
+      setScrollProgress(progress);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useFrame(() => {
+    if (scene.fog) {
+      // Increase fog density as we dive deeper
+      scene.fog.near = 5 + scrollProgress * 10;
+      scene.fog.far = 50 + scrollProgress * 30;
+      
+      // Change fog color to darker as we dive
+      const darkFactor = 0.1 + scrollProgress * 0.3;
+      scene.fog.color.setRGB(darkFactor, darkFactor, darkFactor);
+    }
+  });
+
+  return null;
+}
+
+// Scroll-Reactive Camera Component
+function ScrollCamera() {
+  const { camera } = useThree();
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const lastUpdate = useRef(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = scrollTop / scrollHeight;
+      setScrollProgress(progress);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useFrame(() => {
+    const now = Date.now();
+    // Only update every 16ms (60fps) for better performance
+    if (now - lastUpdate.current > 16) {
+      // Gentle camera movement
+      camera.position.z = 5 + scrollProgress * 3; // Reduced from 5
+      
+      // Very subtle tilt
+      camera.rotation.x = scrollProgress * 0.03; // Reduced from 0.05
+      
+      // Update camera
+      camera.updateMatrixWorld();
+      lastUpdate.current = now;
+    }
+  });
+
+  return null; // This component only affects the camera
+}
+
+// Advanced Stars component with instanced meshes and twinkling effects
+const STAR_COUNT = 200; // Reduced from 400 for better performance
+const STAR_AREA = 80; // Reduced from 100
+const STAR_SPEED = 0.02; // Reduced from 0.03
+
+function randomStarPosition(area) {
+  return [
+    (Math.random() - 0.5) * area,
+    (Math.random() - 0.5) * area,
+    (Math.random() - 0.5) * area,
+  ];
+}
+
+function randomStarColor() {
+  const colors = [
+    "#ffffff",
+    "#ffeedd",
+    "#dbeafe",
+    "#e0e7ff",
+  ];
+  return colors[Math.floor(Math.random() * colors.length)];
+}
+
+function SmoothStars() {
+  const meshRef = useRef();
+  const [scrollProgress, setScrollProgress] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = scrollTop / scrollHeight;
+      setScrollProgress(progress);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const stars = useMemo(() => {
+    return Array.from({ length: STAR_COUNT }).map(() => ({
+      position: randomStarPosition(STAR_AREA),
+      color: randomStarColor(),
+      scale: 0.04 + Math.random() * 0.06, // Smaller stars
+      twinklePhase: Math.random() * Math.PI * 2,
+    }));
+  }, []);
+
+  useFrame((state, delta) => {
+    if (meshRef.current) {
+      for (let i = 0; i < STAR_COUNT; i++) {
+        const { position, scale, twinklePhase } = stars[i];
+
+        // Gentle upward movement
+        position[1] += STAR_SPEED * delta * 60;
+        if (position[1] > STAR_AREA / 2) {
+          position[1] = -STAR_AREA / 2;
+        }
+
+        // Subtle scroll-based movement
+        position[2] -= scrollProgress * 0.15; // Reduced from 0.2
+        if (position[2] < -STAR_AREA / 2) {
+          position[2] = STAR_AREA / 2;
+        }
+
+        // Gentle twinkle effect
+        const twinkle =
+          0.8 +
+          0.2 *
+            Math.sin(
+              state.clock.getElapsedTime() * 1.2 + // Slower twinkle
+                twinklePhase +
+                position[0] * 0.2
+            );
+
+        // Set instance matrix
+        const mat = new THREE.Matrix4();
+        mat.makeTranslation(...position);
+        mat.scale(new THREE.Vector3(scale * twinkle, scale * twinkle, scale * twinkle));
+        meshRef.current.setMatrixAt(i, mat);
+
+        // Set color/opacity
+        meshRef.current.setColorAt(
+          i,
+          new THREE.Color(stars[i].color).lerp(
+            new THREE.Color("#fff"),
+            0.3 + twinkle * 0.15 // Reduced intensity
+          )
+        );
+      }
+      meshRef.current.instanceMatrix.needsUpdate = true;
+      meshRef.current.instanceColor.needsUpdate = true;
+    }
+  });
+
+  return (
+    <instancedMesh
+      ref={meshRef}
+      args={[null, null, STAR_COUNT]}
+      castShadow={false}
+      receiveShadow={false}
+    >
+      <sphereGeometry args={[1, 6, 6]} /> {/* Reduced segments */}
+      <meshBasicMaterial
+        toneMapped={false}
+        transparent
+        opacity={0.6} // Reduced from 0.7
+        depthWrite={false}
+      />
+    </instancedMesh>
+  );
+}
+
+// Floating Geometric Shapes Component
+function FloatingShapes() {
+  const groupRef = useRef();
+  const [scrollProgress, setScrollProgress] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = scrollTop / scrollHeight;
+      setScrollProgress(progress);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const shapes = useMemo(() => {
+    return Array.from({ length: 6 }).map(() => ({ // Increased from 4
+      position: [
+        (Math.random() - 0.5) * 30, // Increased area
+        (Math.random() - 0.5) * 30,
+        (Math.random() - 0.5) * 30
+      ],
+      rotation: [
+        Math.random() * Math.PI,
+        Math.random() * Math.PI,
+        Math.random() * Math.PI
+      ],
+      scale: 0.8 + Math.random() * 1.2, // Larger scale
+      type: Math.floor(Math.random() * 3), // 0: cube, 1: sphere, 2: torus
+      speed: 0.4 + Math.random() * 0.6, // Faster speed
+      color: new THREE.Color().setHSL(Math.random(), 0.4, 0.7), // More vibrant colors
+      floatSpeed: 0.5 + Math.random() * 1, // Individual float speed
+      floatAmplitude: 0.5 + Math.random() * 1 // Float amplitude
+    }));
+  }, []);
+
+  useFrame((state) => {
+    if (groupRef.current) {
+      groupRef.current.children.forEach((child, index) => {
+        const shape = shapes[index];
+        
+        // More dynamic rotation
+        child.rotation.x += shape.speed * 0.008; // Increased rotation
+        child.rotation.y += shape.speed * 0.008;
+        child.rotation.z += shape.speed * 0.004; // Added Z rotation
+        
+        // Enhanced floating movement
+        const time = state.clock.getElapsedTime();
+        child.position.y += Math.sin(time * shape.floatSpeed) * shape.floatAmplitude * 0.01;
+        child.position.x += Math.cos(time * shape.floatSpeed * 0.7) * shape.floatAmplitude * 0.005;
+        
+        // Scroll-based movement
+        child.position.z -= scrollProgress * 0.2; // Increased movement
+        if (child.position.z < -15) {
+          child.position.z = 15;
+        }
+        
+        // More dynamic scale pulse
+        const scale = shape.scale + Math.sin(time * 2) * 0.2; // Increased pulse
+        child.scale.setScalar(scale);
+      });
+    }
+  });
+
+  return (
+    <group ref={groupRef}>
+      {shapes.map((shape, index) => (
+        <mesh key={index} position={shape.position} rotation={shape.rotation}>
+          {shape.type === 0 && <boxGeometry args={[1, 1, 1]} />}
+          {shape.type === 1 && <sphereGeometry args={[0.5, 8, 8]} />} {/* Increased segments */}
+          {shape.type === 2 && <torusGeometry args={[0.5, 0.2, 8, 16]} />} {/* Increased segments */}
+          <meshBasicMaterial
+            color={shape.color}
+            transparent
+            opacity={0.25} // Increased opacity
+            wireframe
+          />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
+// Particle System Component
+function ParticleSystem() {
+  const particlesRef = useRef();
+  const [scrollProgress, setScrollProgress] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = scrollTop / scrollHeight;
+      setScrollProgress(progress);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const particles = useMemo(() => {
+    return Array.from({ length: 80 }).map(() => ({
+      position: [
+        (Math.random() - 0.5) * 80,
+        (Math.random() - 0.5) * 80,
+        (Math.random() - 0.5) * 80
+      ],
+      velocity: [
+        (Math.random() - 0.5) * 0.008,
+        (Math.random() - 0.5) * 0.008,
+        (Math.random() - 0.5) * 0.008
+      ],
+      size: 0.08 + Math.random() * 0.15,
+      color: new THREE.Color().setHSL(Math.random(), 0.6, 0.8)
+    }));
+  }, []);
+
+  useFrame((state) => {
+    if (particlesRef.current) {
+      particlesRef.current.children.forEach((particle, index) => {
+        const particleData = particles[index];
+        
+        // Update position
+        particle.position.x += particleData.velocity[0];
+        particle.position.y += particleData.velocity[1];
+        particle.position.z += particleData.velocity[2];
+        
+        // Scroll-based movement - particles move away as we dive deeper
+        particle.position.z -= scrollProgress * 0.4;
+        if (particle.position.z < -40) {
+          particle.position.z = 40;
+        }
+        
+        // Wrap around boundaries
+        if (Math.abs(particle.position.x) > 40) particleData.velocity[0] *= -1;
+        if (Math.abs(particle.position.y) > 40) particleData.velocity[1] *= -1;
+        if (Math.abs(particle.position.z) > 40) particleData.velocity[2] *= -1;
+        
+        // Pulse size
+        const scale = particleData.size + Math.sin(state.clock.getElapsedTime() * 2 + index) * 0.03;
+        particle.scale.setScalar(scale);
+      });
+    }
+  });
+
+  return (
+    <group ref={particlesRef}>
+      {particles.map((particle, index) => (
+        <mesh key={index} position={particle.position}>
+          <sphereGeometry args={[0.15, 4, 4]} />
+          <meshBasicMaterial
+            color={particle.color}
+            transparent
+            opacity={0.7}
+          />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
+// Simple Test Cube Component
+function SimpleCube() {
+  const meshRef = useRef();
+
+  useFrame(() => {
+    if (meshRef.current) {
+      meshRef.current.rotation.x += 0.01;
+      meshRef.current.rotation.y += 0.01;
+    }
+  });
+
+  return (
+    <mesh ref={meshRef} position={[0, 0, 0]}>
+      <boxGeometry args={[2, 2, 2]} />
+      <meshStandardMaterial color="#ff0000" />
+    </mesh>
+  );
+}
+
+// Simple Stars Component
+function SimpleStars() {
   const stars = [];
-  for (let i = 0; i < 1000; i++) {
+  for (let i = 0; i < 100; i++) {
     stars.push(
       <mesh
         key={i}
         position={[
-          (Math.random() - 0.5) * 200,
-          (Math.random() - 0.5) * 200,
-          (Math.random() - 0.5) * 200
+          (Math.random() - 0.5) * 50,
+          (Math.random() - 0.5) * 50,
+          (Math.random() - 0.5) * 50
         ]}
       >
         <sphereGeometry args={[0.1]} />
@@ -38,29 +729,92 @@ function SmoothStars() {
     );
   }
 
-  return <group ref={starsRef}>{stars}</group>;
+  return <group>{stars}</group>;
 }
 
 function App() {
+  // Memoize the 3D background components to prevent unnecessary re-renders
+  const ThreeBackground = useMemo(() => (
+    <div className="three-background">
+      <Canvas 
+        camera={{ position: [0, 0, 5], fov: 75 }}
+        gl={{ 
+          antialias: false, // Disable antialiasing for better performance
+          powerPreference: "high-performance",
+          stencil: false,
+          depth: false
+        }}
+        dpr={[1, 2]} // Limit pixel ratio for better performance
+      >
+        <ambientLight intensity={0.4} />
+        <pointLight position={[10, 10, 10]} intensity={0.6} />
+        <fog attach="fog" args={['#0a0a0a', 10, 40]} />
+        <ScrollCamera />
+        <SmoothStars />
+        <FloatingShapes />
+        <OrbitControls enableZoom={false} enablePan={false} />
+      </Canvas>
+    </div>
+  ), []);
+
+  useEffect(() => {
+    // Initialize AOS with performance optimizations
+    AOS.init({
+      duration: 800,
+      easing: 'ease-out-cubic',
+      once: true, // Only animate once
+      offset: 100,
+      delay: 0,
+      disable: 'mobile' // Disable on mobile for better performance
+    });
+
+    // Smooth scrolling with passive listeners
+    const handleSmoothScroll = (e) => {
+      const target = e.target.getAttribute('href');
+      if (target && target.startsWith('#')) {
+        e.preventDefault();
+        const element = document.querySelector(target);
+        if (element) {
+          element.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+      }
+    };
+
+    // Add smooth scroll listeners
+    const links = document.querySelectorAll('a[href^="#"]');
+    links.forEach(link => {
+      link.addEventListener('click', handleSmoothScroll, { passive: false });
+    });
+
+    return () => {
+      links.forEach(link => {
+        link.removeEventListener('click', handleSmoothScroll);
+      });
+    };
+  }, []);
+
   return (
     <div className="App">
-      {/* Three.js Background */}
-      <div className="three-background">
-        <Canvas camera={{ position: [0, 2, 8], fov: 35 }}>
-          <Suspense fallback={null}>
-            <SmoothStars />
-            <OrbitControls enableZoom={false} enablePan={false} />
-          </Suspense>
-        </Canvas>
-      </div>
-
-      {/* Content */}
+      {ThreeBackground}
       <div className="content">
-        <Navigation />
-        <Hero />
-        <About />
-        <Projects />
-        <Contact />
+        <Suspense fallback={<LoadingSpinner />}>
+          <Navigation />
+        </Suspense>
+        <Suspense fallback={<LoadingSpinner />}>
+          <Hero />
+        </Suspense>
+        <Suspense fallback={<LoadingSpinner />}>
+          <About />
+        </Suspense>
+        <Suspense fallback={<LoadingSpinner />}>
+          <Projects />
+        </Suspense>
+        <Suspense fallback={<LoadingSpinner />}>
+          <Contact />
+        </Suspense>
       </div>
     </div>
   );
