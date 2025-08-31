@@ -2,6 +2,7 @@ import React, { Suspense, useRef, useEffect, useState, useCallback } from 'react
 import { motion } from 'framer-motion';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { useGLTF, useAnimations } from '@react-three/drei';
+import Galaxy from './Galaxy';
 
 function lerp(a, b, t) {
   return a + (b - a) * t;
@@ -114,13 +115,7 @@ const Hero = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Create floating particles
-  const particles = Array.from({ length: 50 }, (_, i) => ({
-    id: i,
-    x: Math.random() * 100,
-    y: Math.random() * 100,
-    delay: Math.random() * 6,
-  }));
+
 
   // Stats counting animation
   const [stats, setStats] = useState({
@@ -171,19 +166,16 @@ const Hero = () => {
 
   return (
     <section id="home" className="section relative overflow-hidden">
-      {/* Floating Particles */}
-      <div className="hero-particles">
-        {particles.map((particle) => (
-          <div
-            key={particle.id}
-            className="particle"
-            style={{
-              left: `${particle.x}%`,
-              top: `${particle.y}%`,
-              animationDelay: `${particle.delay}s`,
-            }}
-          />
-        ))}
+      {/* Galaxy Background */}
+      <div style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0, zIndex: -1 }}>
+        <Galaxy 
+          mouseRepulsion={true}
+          mouseInteraction={true}
+          density={1.5}
+          glowIntensity={0.5}
+          saturation={0.8}
+          hueShift={240}
+        />
       </div>
 
       <div className="container">
@@ -239,7 +231,7 @@ const Hero = () => {
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="btn btn-primary btn-lg"
+                  className="btn btn-primary btn-lg cursor-target"
                 >
                   View My Work
                 </motion.button>
@@ -247,7 +239,7 @@ const Hero = () => {
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="btn btn-secondary btn-lg"
+                  className="btn btn-secondary btn-lg cursor-target"
                 >
                   Download CV
                 </motion.button>

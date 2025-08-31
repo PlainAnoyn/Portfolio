@@ -1,10 +1,42 @@
-import React, { Suspense, useRef, useEffect, lazy, useMemo, useState } from 'react';
+import React, { Suspense, useRef, useEffect, lazy, useMemo, useState, createContext, useContext } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { OrbitControls, useGLTF } from '@react-three/drei';
+import { OrbitControls, useGLTF, useTexture, Sphere } from '@react-three/drei';
 import * as THREE from 'three';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import { motion } from 'framer-motion';
+import TargetCursor from './components/TargetCursor';
+import Footer from './components/Footer';
+
+
+
+
+
+// Scroll Context for centralized scroll management
+const ScrollContext = createContext(0);
+
+export function ScrollProvider({ children }) {
+  const [scrollProgress, setScrollProgress] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = Math.min(scrollTop / scrollHeight, 1);
+      setScrollProgress(progress);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  return (
+    <ScrollContext.Provider value={scrollProgress}>
+      {children}
+    </ScrollContext.Provider>
+  );
+}
+
+export const useScrollProgress = () => useContext(ScrollContext);
 
 // Lazy load components
 const Navigation = lazy(() => import('./components/Navigation'));
@@ -16,7 +48,7 @@ const Contact = lazy(() => import('./components/Contact'));
 // Loading Spinner Component
 const LoadingSpinner = () => (
   <div className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
-    <div className="spinner-border text-primary" role="status">
+            <div className="spinner-border" style={{color: 'var(--accent-color)'}} role="status">
       <span className="visually-hidden">Loading...</span>
     </div>
   </div>
@@ -710,51 +742,384 @@ function SimpleCube() {
   );
 }
 
-// Simple Stars Component
-function SimpleStars() {
-  const stars = [];
-  for (let i = 0; i < 100; i++) {
-    stars.push(
-      <mesh
-        key={i}
-        position={[
-          (Math.random() - 0.5) * 50,
-          (Math.random() - 0.5) * 50,
-          (Math.random() - 0.5) * 50
-        ]}
-      >
-        <sphereGeometry args={[0.1]} />
-        <meshBasicMaterial color="white" />
-      </mesh>
-    );
-  }
+// Enhanced Stars Component with Twinkling and Parallax
+function EnhancedStars({ count = 50, size = 1, depth = 50, speed = 0.0002, opacity = 0.8 }) {
+  const pointsRef = useRef();
+  const mouseRef = useRef({ x: 0, y: 0 });
 
-  return <group>{stars}</group>;
+  // Generate random positions and random twinkle speeds
+  const positions = useMemo(() => {
+    const arr = [];
+    for (let i = 0; i < count; i++) {
+      arr.push((Math.random() - 0.5) * depth); // x
+      arr.push((Math.random() - 0.5) * depth); // y
+      arr.push((Math.random() - 0.5) * depth); // z
+    }
+    return new Float32Array(arr);
+  }, [count, depth]);
+
+  const speeds = useMemo(
+    () => Array.from({ length: count }, () => Math.random() * 2 + 1), 
+    [count]
+  );
+
+  // Mouse movement tracking
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      mouseRef.current.x = (e.clientX / window.innerWidth) - 0.5;
+      mouseRef.current.y = (e.clientY / window.innerHeight) - 0.5;
+    };
+
+    window.addEventListener("mousemove", handleMouseMove, { passive: true });
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, []);
+
+  useFrame(({ clock }) => {
+    if (pointsRef.current) {
+      const t = clock.getElapsedTime();
+      const mouse = mouseRef.current;
+
+      // Parallax rotation based on mouse
+      pointsRef.current.rotation.x = mouse.y * 0.05;
+      pointsRef.current.rotation.y += speed + mouse.x * 0.001;
+
+      // Twinkle by adjusting size over time
+      const sizes = pointsRef.current.geometry.attributes.size.array;
+      for (let i = 0; i < count; i++) {
+        sizes[i] = size * (0.4 + Math.sin(t * speeds[i]) * 0.3);
+      }
+      pointsRef.current.geometry.attributes.size.needsUpdate = true;
+    }
+  });
+
+  return (
+    <points ref={pointsRef}>
+      <bufferGeometry>
+        <bufferAttribute 
+          attach="attributes-position"
+          count={positions.length / 3}
+          array={positions}
+          itemSize={3}
+        />
+        <bufferAttribute 
+          attach="attributes-size"
+          count={count}
+          array={new Float32Array(count).fill(size)}
+          itemSize={1}
+        />
+      </bufferGeometry>
+      <pointsMaterial
+        size={size}
+        color="#ffffff"
+        transparent
+        opacity={opacity}
+        sizeAttenuation={true}
+      />
+    </points>
+  );
+}
+
+// Optimized Space Journey Camera Controller
+function SpaceJourneyCamera() {
+  const { camera } = useThree();
+  const scrollProgress = useScrollProgress();
+  const groupRef = useRef();
+
+  useFrame(() => {
+    if (groupRef.current) {
+      // Move camera forward through space as user scrolls (from 50 to -170)
+      camera.position.z = 50 - scrollProgress * 220;
+      
+      // Subtle side-to-side sway for realism
+      camera.position.x = Math.sin(scrollProgress * Math.PI * 4) * 3;
+      camera.position.y = Math.cos(scrollProgress * Math.PI * 2) * 2;
+      
+      // Always look towards the solar system
+      camera.lookAt(0, 0, -100);
+      
+      // Slowly rotate the whole scene for dynamic feel
+      groupRef.current.rotation.y += 0.0005;
+      groupRef.current.rotation.z = Math.sin(scrollProgress * Math.PI * 2) * 0.01;
+    }
+  });
+
+  return <group ref={groupRef} />;
+}
+
+// Optimized Warp Speed Stars with Context
+function WarpSpeedStars({ count = 100, size = 1, depth = 50, speed = 0.001, opacity = 0.5, warpIntensity = 1 }) {
+  const pointsRef = useRef();
+  const scrollProgress = useScrollProgress();
+  const [scrollVelocity, setScrollVelocity] = useState(0);
+  const lastScrollY = useRef(0);
+
+  // Track scroll velocity for warp effect
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const velocity = Math.abs(scrollTop - lastScrollY.current);
+      setScrollVelocity(velocity);
+      lastScrollY.current = scrollTop;
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Generate star positions once
+  const positions = useMemo(() => {
+    const pos = new Float32Array(count * 3);
+    for (let i = 0; i < count; i++) {
+      pos[i * 3] = (Math.random() - 0.5) * 100;     // x
+      pos[i * 3 + 1] = (Math.random() - 0.5) * 100; // y
+      pos[i * 3 + 2] = -Math.random() * depth;      // z (negative so stars are "in front")
+    }
+    return pos;
+  }, [count, depth]);
+
+  useFrame(({ clock }) => {
+    if (pointsRef.current) {
+      const elapsed = clock.getElapsedTime();
+      
+      // Warp speed effect - stars stretch when scrolling fast
+      const warpEffect = Math.min(scrollVelocity * 0.005, 1) * warpIntensity;
+      
+      // Move stars along z axis, loop them back for endless effect
+      const positions = pointsRef.current.geometry.attributes.position.array;
+      for (let i = 0; i < count; i++) {
+        // Base movement speed plus warp effect
+        const starSpeed = speed * (1 + warpEffect * 5);
+        positions[i * 3 + 2] += starSpeed;
+        
+        // Loop stars back when they pass the camera
+        if (positions[i * 3 + 2] > 10) {
+          positions[i * 3 + 2] = -depth;
+          // Randomize x,y position when looping
+          positions[i * 3] = (Math.random() - 0.5) * 100;
+          positions[i * 3 + 1] = (Math.random() - 0.5) * 100;
+        }
+      }
+      pointsRef.current.geometry.attributes.position.needsUpdate = true;
+      
+      // Subtle twinkling effect
+      pointsRef.current.rotation.y += 0.0001;
+    }
+  });
+
+  return (
+    <points ref={pointsRef}>
+      <bufferGeometry>
+        <bufferAttribute
+          attach="attributes-position"
+          count={count}
+          array={positions}
+          itemSize={3}
+        />
+      </bufferGeometry>
+      <pointsMaterial
+        size={size}
+        color="white"
+        transparent
+        opacity={opacity}
+        sizeAttenuation
+      />
+    </points>
+  );
+}
+
+// Optimized 3D Planet Component with Mouse Interaction
+function Planet({ textureUrl, position, size, ringTextureUrl, rotationSpeed = 0.001, name }) {
+  const planetTexture = useTexture(textureUrl);
+  const ringTexture = ringTextureUrl ? useTexture(ringTextureUrl) : null;
+  const planetRef = useRef();
+  const ringRef = useRef();
+  const groupRef = useRef();
+  const scrollProgress = useScrollProgress();
+  const mouseRef = useRef({ x: 0, y: 0 });
+
+  // Mouse movement tracking
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      mouseRef.current.x = (e.clientX / window.innerWidth) - 0.5;
+      mouseRef.current.y = (e.clientY / window.innerHeight) - 0.5;
+    };
+
+    window.addEventListener("mousemove", handleMouseMove, { passive: true });
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, []);
+
+  useFrame(({ clock }) => {
+    const planetGroupRef = planetRef.current?.parent;
+    
+    if (planetGroupRef) {
+      // Planet and ring rotation together (slower auto-rotation)
+      planetGroupRef.rotation.y += rotationSpeed * 0.3;
+      
+      // Subtle floating motion for the whole planet+ring group
+      planetGroupRef.position.y = Math.sin(clock.getElapsedTime() * 0.5) * 0.8;
+      
+      // Scale slightly based on scroll (planets get bigger as you approach)
+      const scaleBoost = 1 + scrollProgress * 0.3;
+      planetGroupRef.scale.setScalar(scaleBoost);
+    }
+    
+    if (ringRef.current) {
+      // Ring rotation (slightly different speed for realism)
+      ringRef.current.rotation.z += rotationSpeed * 0.2;
+    }
+
+    // Mouse parallax effect on the whole planet group
+    if (groupRef.current) {
+      const mouse = mouseRef.current;
+      // Parallax intensity based on distance from center
+      const parallaxStrength = 1 / (Math.abs(position[2]) / 50 + 1);
+      
+      groupRef.current.rotation.x = mouse.y * 0.1 * parallaxStrength;
+      groupRef.current.rotation.y = mouse.x * 0.1 * parallaxStrength;
+      
+      // Subtle position shift based on mouse
+      groupRef.current.position.x = position[0] + mouse.x * 5 * parallaxStrength;
+      groupRef.current.position.y = position[1] + mouse.y * 3 * parallaxStrength;
+    }
+  });
+
+  return (
+    <group ref={groupRef} position={position}>
+      {/* Planet and Ring Group - ensures they move together */}
+      <group>
+        {/* Main planet */}
+        <Sphere args={[size, 256, 256]} ref={planetRef}>
+          <meshStandardMaterial 
+            map={planetTexture} 
+            roughness={name === 'Moon' ? 0.8 : 0.2}
+            metalness={name === 'Moon' ? 0.0 : 0.0}
+            emissive={name === 'Moon' ? "#333333" : "#222222"}
+            emissiveIntensity={name === 'Moon' ? 0.2 : 0.3}
+            displacementScale={0}
+            normalScale={[1, 1]}
+            flatShading={false}
+          />
+        </Sphere>
+
+        {/* Saturn ring - positioned relative to planet */}
+        {ringTexture && (
+          <mesh ref={ringRef} rotation={[-Math.PI / 2.2, 0, 0]} position={[0, 0, 0]}>
+            <ringGeometry args={[size * 1.3, size * 2.2, 64]} />
+            <meshStandardMaterial
+              map={ringTexture}
+              side={THREE.DoubleSide}
+              transparent
+              opacity={0.9}
+              roughness={0.3}
+              metalness={0.1}
+            />
+          </mesh>
+        )}
+      </group>
+      
+
+    </group>
+  );
+}
+
+// Optimized Solar System with Context
+function SolarSystem() {
+  return (
+    <group>
+      {/* Planets positioned for scroll-through journey */}
+      
+      {/* Moon - Random position */}
+      <Planet 
+        textureUrl="/textures/Moon.jpg"
+        position={[75, -55, -45]}
+        size={12}
+        rotationSpeed={0.001}
+        name="Moon"
+      />
+      
+      {/* Earth - Random position */}
+      <Planet 
+        textureUrl="/textures/Earth.jpg"
+        position={[-45, 70, -95]}
+        size={16}
+        rotationSpeed={0.0015}
+        name="Earth"
+      />
+      
+      {/* Venus - Random position */}
+      <Planet 
+        textureUrl="/textures/Vernus.jpg"
+        position={[105, 35, -165]}
+        size={14}
+        rotationSpeed={0.0008}
+        name="Venus"
+      />
+      
+      {/* Jupiter - Random position */}
+      <Planet 
+        textureUrl="/textures/Jupiter.jpg"
+        position={[-120, -45, -210]}
+        size={24}
+        rotationSpeed={0.002}
+        name="Jupiter"
+      />
+      
+      {/* Saturn - Random position */}
+      <Planet 
+        textureUrl="/textures/Saturn.jpg"
+        ringTextureUrl="/textures/Saturn_ring.jpg"
+        position={[25, -85, -310]}
+        size={20}
+        rotationSpeed={0.0012}
+        name="Saturn"
+      />
+    </group>
+  );
+}
+
+// Enhanced Space Journey with Planets and Stars
+function SpaceJourneyStarfield() {
+  return (
+    <>
+      <SpaceJourneyCamera />
+      
+
+      
+      {/* Enhanced lighting for planets */}
+      <ambientLight intensity={1.2} />
+      <directionalLight position={[100, 100, 100]} intensity={3} color="#ffffff" castShadow />
+      <pointLight position={[50, 50, 50]} intensity={2.5} color="#ffffff" />
+      <pointLight position={[-50, -50, 50]} intensity={1.5} color="#ffffff" />
+      <pointLight position={[0, 0, 150]} intensity={2} color="#ffffff" />
+      <pointLight position={[-100, 0, 0]} intensity={1} color="#FFA500" />
+      <pointLight position={[100, 0, 0]} intensity={1} color="#87CEEB" />
+      
+
+    </>
+  );
 }
 
 function App() {
   // Memoize the 3D background components to prevent unnecessary re-renders
   const ThreeBackground = useMemo(() => (
-    <div className="three-background">
-      <Canvas 
-        camera={{ position: [0, 0, 5], fov: 75 }}
-        gl={{ 
-          antialias: false, // Disable antialiasing for better performance
-          powerPreference: "high-performance",
-          stencil: false,
-          depth: false
-        }}
-        dpr={[1, 2]} // Limit pixel ratio for better performance
-      >
-        <ambientLight intensity={0.4} />
-        <pointLight position={[10, 10, 10]} intensity={0.6} />
-        <fog attach="fog" args={['#0a0a0a', 10, 40]} />
-        <ScrollCamera />
-        <SmoothStars />
-        <FloatingShapes />
-        <OrbitControls enableZoom={false} enablePan={false} />
-      </Canvas>
-    </div>
+    <ScrollProvider>
+      <div className="three-background">
+        <Canvas 
+          camera={{ position: [0, 0, 50], fov: 75 }}
+          gl={{ 
+            antialias: false, // Disable antialiasing for better performance
+            powerPreference: "high-performance",
+            stencil: false,
+            depth: false
+          }}
+          dpr={[1, 2]} // Limit pixel ratio for better performance
+        >
+          <color attach="background" args={['#000000']} />
+          <fog attach="fog" args={['#0a0a0a', 50, 300]} />
+          <SpaceJourneyStarfield />
+        </Canvas>
+      </div>
+    </ScrollProvider>
   ), []);
 
   useEffect(() => {
@@ -798,6 +1163,11 @@ function App() {
 
   return (
     <div className="App">
+      <TargetCursor 
+        spinDuration={2}
+        hideDefaultCursor={true}
+      />
+
       {ThreeBackground}
       <div className="content">
         <Suspense fallback={<LoadingSpinner />}>
@@ -815,8 +1185,11 @@ function App() {
         <Suspense fallback={<LoadingSpinner />}>
           <Contact />
         </Suspense>
+        <Suspense fallback={<LoadingSpinner />}>
+          <Footer />
+        </Suspense>
       </div>
-    </div>
+      </div>
   );
 }
 

@@ -97,7 +97,7 @@ const Projects = () => {
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.95 }}
                         href={project.link}
-                        className="btn btn-outline-primary btn-sm"
+                        className="btn btn-outline-primary btn-sm cursor-target"
                         data-bs-toggle="tooltip"
                         data-bs-placement="top"
                         title="View Live"
@@ -170,7 +170,7 @@ const Projects = () => {
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="btn btn-primary btn-lg"
+                            className="btn btn-primary btn-lg cursor-target"
           >
             View All Projects
           </motion.button>

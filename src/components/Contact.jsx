@@ -1,6 +1,8 @@
 import React, { useState, useRef } from 'react';
-import { motion } from 'framer-motion';
-import emailjs from 'emailjs-com';
+import { motion, AnimatePresence } from 'framer-motion';
+import githubIcon from '../assets/github.png';
+import linkedinIcon from '../assets/linkedin.png';
+import twitterIcon from '../assets/twitter.png';
 
 const Contact = () => {
   const formRef = useRef();
@@ -12,7 +14,34 @@ const Contact = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState(null); // 'success', 'error', null
   const [messageLength, setMessageLength] = useState(0);
+  const [burstParticles, setBurstParticles] = useState([]);
   const maxCharacters = 500;
+
+  // Firecracker burst effect
+  const createBurstEffect = (x, y) => {
+    const particles = [];
+    const colors = ['#fbbf24', '#f59e0b', '#d97706', '#92400e', '#ffffff'];
+    
+    for (let i = 0; i < 12; i++) {
+      particles.push({
+        id: Date.now() + i,
+        x: x,
+        y: y,
+        angle: (i * 30) + Math.random() * 30,
+        distance: 80 + Math.random() * 40,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        size: 3 + Math.random() * 4,
+        delay: Math.random() * 0.2
+      });
+    }
+    
+    setBurstParticles(particles);
+    
+    // Clear particles after animation
+    setTimeout(() => {
+      setBurstParticles([]);
+    }, 1000);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,36 +49,21 @@ const Contact = () => {
     setSubmitStatus(null);
 
     try {
-      // EmailJS configuration for bipeshk48@gmail.com
-      // You need to set up EmailJS with these steps:
-      // 1. Go to https://www.emailjs.com/
-      // 2. Sign up and create a Gmail service
-      // 3. Create a template with this content:
-      //    Subject: New Portfolio Contact from {{name}}
-      //    Body: 
-      //    Name: {{name}}
-      //    Email: {{email}}
-      //    Message: {{message}}
-      // 4. Replace the IDs below with your actual IDs
-      
-      const result = await emailjs.sendForm(
-        'YOUR_SERVICE_ID', // Replace with your EmailJS service ID
-        'YOUR_TEMPLATE_ID', // Replace with your EmailJS template ID
-        formRef.current,
-        'YOUR_USER_ID' // Replace with your EmailJS user ID
-      );
+      const response = await fetch('http://localhost:5000/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          message: formData.message,
+        }),
+      });
 
-      // Alternative: Formspree (if EmailJS doesn't work)
-      // const formData = new FormData(formRef.current);
-      // const response = await fetch('https://formspree.io/f/YOUR_FORM_ID', {
-      //   method: 'POST',
-      //   body: formData,
-      //   headers: {
-      //     'Accept': 'application/json'
-      //   }
-      // });
+      const result = await response.json();
 
-      if (result.status === 200) {
+      if (result.success) {
         setSubmitStatus('success');
         setFormData({ name: '', email: '', message: '' });
         setMessageLength(0);
@@ -60,9 +74,10 @@ const Contact = () => {
         }
       } else {
         setSubmitStatus('error');
+        console.error('Server Error:', result.message);
       }
     } catch (error) {
-      console.error('EmailJS Error:', error);
+      console.error('Network Error:', error);
       setSubmitStatus('error');
     } finally {
       setIsSubmitting(false);
@@ -96,34 +111,25 @@ const Contact = () => {
     }
   };
 
-  const socialLinks = [
+    const socialLinks = [
     {
       name: 'GitHub',
-      url: 'https://github.com',
-      icon: (
-        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-          <path fillRule="evenodd" d="M10 0C4.477 0 0 4.484 0 10.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0020 10.017C20 4.484 15.522 0 10 0z" clipRule="evenodd" />
-        </svg>
-      ),
+      url: 'https://github.com/PlainAnoyn',
+      icon: githubIcon,
+      color: '#333'
     },
     {
       name: 'LinkedIn',
-      url: 'https://linkedin.com',
-      icon: (
-        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-          <path fillRule="evenodd" d="M16.338 16.338H13.67V12.16c0-.995-.017-2.277-1.387-2.277-1.39 0-1.601 1.086-1.601 2.207v4.248H8.014v-8.59h2.559v1.174h.037c.356-.675 1.227-1.387 2.526-1.387 2.703 0 3.203 1.778 3.203 4.092v4.711zM5.005 6.575a1.548 1.548 0 11-.003-3.096 1.548 1.548 0 01.003 3.096zm-1.337 9.763H6.34v-8.59H3.667v8.59zM17.668 1H2.328C1.595 1 1 1.581 1 2.298v15.403C1 18.418 1.595 19 2.328 19h15.34c.734 0 1.332-.582 1.332-1.299V2.298C19 1.581 18.402 1 17.668 1z" clipRule="evenodd" />
-        </svg>
-      ),
+      url: 'https://www.linkedin.com/in/bipesh-karki-50607a279/',
+      icon: linkedinIcon,
+      color: '#0077b5'
     },
     {
       name: 'Twitter',
       url: 'https://twitter.com',
-      icon: (
-        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-          <path d="M6.29 18.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0020 3.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.073 4.073 0 01.8 7.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 010 16.407a11.616 11.616 0 006.29 1.84" />
-        </svg>
-      ),
-    },
+      icon: twitterIcon,
+      color: '#1DA1F2'
+    }
   ];
 
   return (
@@ -258,7 +264,7 @@ const Contact = () => {
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         type="submit"
-                        className="btn btn-primary btn-lg w-100"
+                        className="btn btn-primary btn-lg w-100 cursor-target"
                         disabled={isSubmitting || messageLength === 0}
                         aria-label={isSubmitting ? "Sending message..." : "Send message"}
                         aria-describedby="submitHelp"
@@ -313,38 +319,149 @@ const Contact = () => {
                 <div className="mb-4">
                   <h5 className="text-white mb-3">📱 Phone</h5>
                   <a 
-                    href="tel:+9771234567890" 
+                    href="tel:+977 9767805929" 
                     className="text-decoration-none text-muted"
-                    aria-label="Call +977 1234567890"
+                    aria-label="Call +977 9767805929"
                   >
-                    +977 1234567890
+                    +977 9767805929
                   </a>
                 </div>
 
                 <div className="mb-4">
                   <h5 className="text-white mb-3">🌐 Social Media</h5>
-                  <div className="d-flex gap-3">
+                  <div className="d-flex gap-4">
                     {socialLinks.map((link, index) => (
-                      <motion.a
+                      <motion.div
                         key={link.name}
-                        href={link.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="social-link d-flex align-items-center justify-content-center"
-                        whileHover={{ scale: 1.1, y: -5 }}
-                        whileTap={{ scale: 0.95 }}
-                        aria-label={`Visit ${link.name} profile`}
-                        role="button"
-                        tabIndex={0}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' || e.key === ' ') {
-                            e.preventDefault();
-                            window.open(link.url, '_blank');
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ 
+                          duration: 0.5, 
+                          delay: index * 0.1,
+                          type: "spring",
+                          stiffness: 100
+                        }}
+                        whileHover={{ 
+                          scale: 1.15, 
+                          y: -8,
+                          rotate: 5,
+                          transition: { 
+                            type: "spring", 
+                            stiffness: 300,
+                            damping: 10
                           }
                         }}
+                        whileTap={{ 
+                          scale: 0.7,
+                          rotate: -15,
+                          transition: { duration: 0.1 }
+                        }}
+                        className="social-icon-container"
+                        style={{
+                          width: '60px',
+                          height: '60px',
+                          borderRadius: '50%',
+                          background: `linear-gradient(135deg, ${link.color}22, ${link.color}44)`,
+                          border: `2px solid ${link.color}66`,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          cursor: 'pointer',
+                          position: 'relative',
+                          overflow: 'hidden',
+                          transition: 'all 0.3s ease'
+                        }}
                       >
-                        {link.icon}
-                      </motion.a>
+                        <motion.a
+                          href={link.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="cursor-target"
+                          style={{
+                            textDecoration: 'none',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: '100%',
+                            height: '100%',
+                            position: 'relative',
+                            zIndex: 2
+                          }}
+                          aria-label={`Visit ${link.name} profile`}
+                          role="button"
+                          tabIndex={0}
+                          onClick={(e) => {
+                            const rect = e.currentTarget.getBoundingClientRect();
+                            const x = rect.left + rect.width / 2;
+                            const y = rect.top + rect.height / 2;
+                            createBurstEffect(x, y);
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              window.open(link.url, '_blank');
+                            }
+                          }}
+                        >
+                          <motion.img
+                            src={link.icon}
+                            alt={link.name}
+                            style={{
+                              width: '32px',
+                              height: '32px',
+                              filter: 'brightness(0.8)',
+                              transition: 'all 0.3s ease'
+                            }}
+                            whileHover={{
+                              filter: 'brightness(1.2) drop-shadow(0 0 8px rgba(251, 191, 36, 0.6))',
+                              scale: 1.1,
+                              transition: { duration: 0.3 }
+                            }}
+                          />
+                        </motion.a>
+                        
+                        {/* Hover effect overlay */}
+                        <motion.div
+                          className="social-hover-overlay"
+                          style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            background: `linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(251, 191, 36, 0.4))`,
+                            borderRadius: '50%',
+                            opacity: 0,
+                            zIndex: 1
+                          }}
+                          whileHover={{
+                            opacity: 1,
+                            scale: 1.2,
+                            transition: { duration: 0.3 }
+                          }}
+                        />
+                        
+                        {/* Glow effect */}
+                        <motion.div
+                          className="social-glow"
+                          style={{
+                            position: 'absolute',
+                            top: '-2px',
+                            left: '-2px',
+                            right: '-2px',
+                            bottom: '-2px',
+                            background: `radial-gradient(circle, rgba(251, 191, 36, 0.4), transparent 70%)`,
+                            borderRadius: '50%',
+                            opacity: 0,
+                            zIndex: 0
+                          }}
+                          whileHover={{
+                            opacity: 1,
+                            scale: 1.3,
+                            transition: { duration: 0.4 }
+                          }}
+                        />
+                      </motion.div>
                     ))}
                   </div>
                 </div>
@@ -360,6 +477,42 @@ const Contact = () => {
           </motion.div>
         </div>
       </div>
+
+      {/* Firecracker Burst Particles */}
+      <AnimatePresence>
+        {burstParticles.map((particle) => (
+          <motion.div
+            key={particle.id}
+            initial={{
+              x: particle.x,
+              y: particle.y,
+              scale: 0,
+              opacity: 1
+            }}
+            animate={{
+              x: particle.x + Math.cos(particle.angle * Math.PI / 180) * particle.distance,
+              y: particle.y + Math.sin(particle.angle * Math.PI / 180) * particle.distance,
+              scale: [0, 1, 0],
+              opacity: [1, 1, 0]
+            }}
+            transition={{
+              duration: 1,
+              delay: particle.delay,
+              ease: "easeOut"
+            }}
+            style={{
+              position: 'fixed',
+              width: particle.size,
+              height: particle.size,
+              borderRadius: '50%',
+              backgroundColor: particle.color,
+              boxShadow: `0 0 ${particle.size * 2}px ${particle.color}`,
+              pointerEvents: 'none',
+              zIndex: 9999
+            }}
+          />
+        ))}
+      </AnimatePresence>
     </section>
   );
 };

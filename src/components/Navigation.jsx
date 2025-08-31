@@ -38,12 +38,12 @@ const SlideTextNavItem = ({ label, hoverText, onClick, delay = 0 }) => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay }}
     >
-      <motion.button
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.95 }}
-        className="nav-link text-white fw-medium position-relative d-flex align-items-center gap-2 slide-text-container"
-        onClick={onClick}
-      >
+              <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+          className="nav-link text-white fw-medium position-relative d-flex align-items-center gap-2 slide-text-container cursor-target"
+          onClick={onClick}
+        >
         <span className="slide-text-wrapper">
           <span className="slide-text-original">{label}</span>
           <span className="slide-text-hover" data-hover={hoverText || label}>
@@ -96,7 +96,7 @@ const Navigation = () => {
         {/* Brand/Logo */}
         <motion.div
           whileHover={{ scale: 1.05 }}
-          className="navbar-brand d-flex align-items-center"
+          className="navbar-brand d-flex align-items-center cursor-target"
           onClick={() => scrollToSection('home')}
           style={{ cursor: 'pointer' }}
         >
@@ -107,7 +107,7 @@ const Navigation = () => {
         <motion.button
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
-          className="navbar-toggler border-0"
+          className="navbar-toggler border-0 cursor-target"
           type="button"
           data-bs-toggle="collapse"
           data-bs-target="#navbarNav"
@@ -148,7 +148,7 @@ const Navigation = () => {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="btn btn-primary btn-sm"
+                className="btn btn-primary btn-sm cursor-target"
                 onClick={() => scrollToSection('contact')}
               >
                 Get In Touch
