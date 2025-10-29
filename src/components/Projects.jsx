@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
@@ -12,13 +12,77 @@ function ProjectCube({ color, position }) {
   );
 }
 
+function ImageCarousel({ images, alt, fit = 'cover' }) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    if (!images || images.length <= 1) return;
+    const id = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % images.length);
+    }, 3000);
+    return () => clearInterval(id);
+  }, [images]);
+
+  if (!images || images.length === 0) return null;
+
+  const goPrev = () => setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
+  const goNext = () => setCurrentIndex((prev) => (prev + 1) % images.length);
+
+  return (
+    <div className="position-relative mb-4 rounded overflow-hidden" style={{ height: '260px' }}>
+      <img
+        src={images[currentIndex]}
+        alt={alt}
+        className="img-fluid w-100 h-100"
+        style={{ objectFit: fit, backgroundColor: fit === 'contain' ? 'rgba(0,0,0,0.3)' : undefined }}
+        loading="lazy"
+      />
+      {images.length > 1 && (
+        <>
+          <button
+            type="button"
+            aria-label="Previous image"
+            className="btn btn-sm btn-dark position-absolute"
+            style={{ top: '50%', left: '8px', transform: 'translateY(-50%)', opacity: 0.75 }}
+            onClick={goPrev}
+          >
+            ‹
+          </button>
+          <button
+            type="button"
+            aria-label="Next image"
+            className="btn btn-sm btn-dark position-absolute"
+            style={{ top: '50%', right: '8px', transform: 'translateY(-50%)', opacity: 0.75 }}
+            onClick={goNext}
+          >
+            ›
+          </button>
+          <div className="position-absolute d-flex gap-1" style={{ bottom: '8px', left: '50%', transform: 'translateX(-50%)' }}>
+            {images.map((_, i) => (
+              <span
+                key={i}
+                style={{ width: '8px', height: '8px', borderRadius: '50%', background: i === currentIndex ? '#fff' : 'rgba(255,255,255,0.5)' }}
+              />
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 const Projects = () => {
   const projects = [
     {
       title: 'E-Commerce Platform',
       description: 'A full-stack e-commerce platform built with React, Node.js, and MongoDB. Features include user authentication, payment processing, and admin dashboard.',
       technologies: ['React', 'Node.js', 'MongoDB', 'Stripe'],
-      image: '/project1.jpg',
+      images: [
+        '/projects/CozyPlates/cozyplate.png',
+        '/projects/CozyPlates/Cozy plates 2.png',
+        '/projects/CozyPlates/Cozyplate 1.png',
+        '/projects/CozyPlates/cozyplate 3.png'
+      ],
       link: '#',
       github: '#',
       color: '#667eea',
@@ -27,7 +91,14 @@ const Projects = () => {
       title: '3D Portfolio Website',
       description: 'An interactive portfolio website featuring Three.js animations and immersive 3D experiences. Custom shaders and particle systems.',
       technologies: ['Three.js', 'React', 'WebGL', 'GSAP'],
-      image: '/project2.jpg',
+      images: [
+        '/projects/DamiChha/1761751757578.jpg',
+        '/projects/DamiChha/1761751757593.jpg',
+        '/projects/DamiChha/1761751757604.jpg',
+        '/projects/DamiChha/1761751757622.jpg',
+        '/projects/DamiChha/1761751757636.jpg'
+      ],
+      imageFit: 'contain',
       link: '#',
       github: '#',
       color: '#764ba2',
@@ -36,7 +107,12 @@ const Projects = () => {
       title: 'AI Chat Application',
       description: 'A real-time chat application with AI-powered responses. Built with React, Socket.io, and OpenAI API integration.',
       technologies: ['React', 'Socket.io', 'OpenAI', 'Express'],
-      image: '/project3.jpg',
+      images: [
+        '/projects/PathFinder/Screenshot from 2025-10-29 20-39-34.png',
+        '/projects/PathFinder/Screenshot from 2025-10-29 20-39-44.png',
+        '/projects/PathFinder/Screenshot from 2025-10-29 20-40-44.png',
+        '/projects/PathFinder/Screenshot from 2025-10-29 20-41-22.png'
+      ],
       link: '#',
       github: '#',
       color: '#f093fb',
@@ -45,7 +121,12 @@ const Projects = () => {
       title: 'Task Management App',
       description: 'A collaborative task management application with real-time updates, drag-and-drop functionality, and team collaboration features.',
       technologies: ['React', 'Firebase', 'DnD Kit', 'Tailwind'],
-      image: '/project4.jpg',
+      images: [
+        '/projects/Shangrila/Screenshot from 2025-10-29 20-53-57.png',
+        '/projects/Shangrila/Screenshot from 2025-10-29 20-54-10.png',
+        '/projects/Shangrila/Screenshot from 2025-10-29 20-54-18.png',
+        '/projects/Shangrila/Screenshot from 2025-10-29 20-54-26.png'
+      ],
       link: '#',
       github: '#',
       color: '#4facfe',
@@ -92,36 +173,12 @@ const Projects = () => {
                       <h3 className="h4 fw-bold text-white mb-2">{project.title}</h3>
                       <div className="w-25 h-1 bg-gradient rounded"></div>
                     </div>
-                    <div className="d-flex gap-2">
-                      <motion.a
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.95 }}
-                        href={project.link}
-                        className="btn btn-outline-primary btn-sm cursor-target"
-                        data-bs-toggle="tooltip"
-                        data-bs-placement="top"
-                        title="View Live"
-                      >
-                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                          <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
-                          <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
-                        </svg>
-                      </motion.a>
-                      <motion.a
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.95 }}
-                        href={project.github}
-                        className="btn btn-outline-secondary btn-sm"
-                        data-bs-toggle="tooltip"
-                        data-bs-placement="top"
-                        title="View Code"
-                      >
-                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M10 0C4.477 0 0 4.484 0 10.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0020 10.017C20 4.484 15.522 0 10 0z" clipRule="evenodd" />
-                        </svg>
-                      </motion.a>
-                    </div>
                   </div>
+
+                  {/* Project Images Carousel */}
+                  {project.images && (
+                    <ImageCarousel images={project.images} alt={`${project.title} preview`} fit={project.imageFit || 'cover'} />
+                  )}
 
                   {/* Project Description */}
                   <p className="text-muted mb-4">
@@ -141,7 +198,7 @@ const Projects = () => {
                   </div>
 
                   {/* Three.js Preview */}
-                  <div className="card card-custom border-0 overflow-hidden" style={{ height: '200px' }}>
+                  {/* <div style={{ height: '200px' }}>
                     <div className="card-body p-0">
                       <Canvas camera={{ position: [0, 0, 3] }}>
                         <ambientLight intensity={0.5} />
@@ -152,7 +209,7 @@ const Projects = () => {
                         <OrbitControls enableZoom={false} autoRotate autoRotateSpeed={2} />
                       </Canvas>
                     </div>
-                  </div>
+                  </div> */}
                 </div>
               </motion.div>
             </motion.div>
@@ -167,13 +224,16 @@ const Projects = () => {
           viewport={{ once: true }}
           className="text-center mt-5"
         >
-          <motion.button
+          <motion.a
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-                            className="btn btn-primary btn-lg cursor-target"
+            href="https://github.com/PlainAnoyn"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn btn-primary btn-lg cursor-target"
           >
             View All Projects
-          </motion.button>
+          </motion.a>
         </motion.div>
       </div>
     </section>

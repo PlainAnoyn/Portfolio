@@ -232,17 +232,23 @@ const Hero = () => {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   className="btn btn-primary btn-lg cursor-target"
+                  onClick={() => {
+                    const projectsSection = document.getElementById('projects');
+                    if (projectsSection) {
+                      projectsSection.scrollIntoView({ behavior: 'smooth' });
+                    }
+                  }}
                 >
                   View My Work
                 </motion.button>
                 
-                <motion.button
+                {/* <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   className="btn btn-secondary btn-lg cursor-target"
                 >
                   Download CV
-                </motion.button>
+                </motion.button> */}
               </motion.div>
             </motion.div>
           </motion.div>

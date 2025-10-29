@@ -191,30 +191,21 @@ const About = () => {
 
   const experience = [
     {
-      title: 'Full Stack Developer',
-      company: 'Tech Solutions Inc.',
-      period: '2023 - Present',
-      location: 'Remote',
-      description: 'Leading development of modern web applications using React, Node.js, and cloud technologies. Implemented responsive designs and optimized performance.',
-      technologies: ['React', 'Node.js', 'MongoDB', 'AWS', 'TypeScript'],
-      icon: '💼'
-    },
-    {
-      title: 'Frontend Developer',
-      company: 'Digital Creations',
-      period: '2022 - 2023',
+      title: 'Web Developer & UX/UI Developer',
+      company: 'Internship (3 months)',
+      period: '3 months',
       location: 'Kathmandu, Nepal',
-      description: 'Specialized in creating responsive and interactive user interfaces with React and Three.js. Collaborated with design teams to implement pixel-perfect designs.',
-      technologies: ['React', 'Three.js', 'CSS3', 'JavaScript', 'Figma'],
-      icon: '🎨'
+      description: 'Completed a 3-month internship specializing in web development and UX/UI design. Worked on creating responsive web interfaces, implementing user-centered designs, and ensuring optimal user experiences across different devices.',
+      technologies: ['React', 'JavaScript', 'CSS', 'Figma', 'Git', 'UI/UX'],
+      icon: '🎓'
     },
     {
-      title: 'Junior Developer',
-      company: 'StartUp Hub',
-      period: '2021 - 2022',
+      title: 'Independent Full Stack Developer',
+      company: 'Self-Driven Projects',
+      period: '5+ years',
       location: 'Remote',
-      description: 'Contributed to various projects involving web development and 3D graphics programming. Developed features for client applications and maintained code quality.',
-      technologies: ['JavaScript', 'HTML/CSS', 'Git', 'Three.js', 'Node.js'],
+      description: 'Built diverse projects across multiple platforms including full-stack web applications, mobile apps, responsive websites, and desktop applications. Delivered end-to-end solutions including CozyPlates, DamiChha, PathFinder, and Shangrila, focusing on modern architectures and user experiences.',
+      technologies: ['React', 'Node.js', 'MongoDB', 'Mobile Development', 'Desktop Apps', 'Three.js', 'Tailwind', 'Framer Motion'],
       icon: '🚀'
     }
   ];
