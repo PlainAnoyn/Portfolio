@@ -125,6 +125,20 @@ html {
   align-items: center;
   justify-content: center;
   position: relative;
+  z-index: 1;
+}
+
+/* Ensure Hero section content is visible on mobile */
+#home .container {
+  position: relative;
+  z-index: 10;
+}
+
+#home .badge-custom,
+#home .gradient-text,
+#home .glass-effect {
+  position: relative;
+  z-index: 10;
 }
 
 .section::before {
@@ -2601,6 +2615,37 @@ textarea.form-control:-moz-placeholder {
   
   .section {
     padding: 1.5rem;
+  }
+}
+
+/* Mobile Hero section fixes */
+@media (max-width: 768px) {
+  #home {
+    padding-top: 80px;
+    min-height: auto;
+  }
+  
+  #home .container {
+    padding-bottom: 2rem;
+  }
+  
+  #home .badge-custom {
+    font-size: 1rem !important;
+    padding: 0.5rem 1rem !important;
+    display: inline-block;
+  }
+  
+  #home .display-1 {
+    font-size: 2.5rem !important;
+  }
+  
+  #home .glass-effect {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  }
+  
+  #home .display-6 {
+    font-size: 1.5rem !important;
   }
 }
 
