@@ -71,7 +71,7 @@ const Hero = () => {
   const [loopNum, setLoopNum] = useState(0);
   const [typingSpeed, setTypingSpeed] = useState(150);
 
-  const toRotate = ["Rajesh Hamal"];
+  const toRotate = ["Bipesh Karki"];
   const period = 1500; // Pause time
 
   const tick = useCallback(() => {
@@ -190,7 +190,7 @@ const Hero = () => {
             <motion.div variants={itemVariants} className="space-y-8">
               <motion.div variants={itemVariants} className="mb-4">
                 <span className="badge badge-custom mb-3 px-4 py-3 fs-4 fw-bold" data-aos="fade-down" data-aos-delay="200">
-                  👋 Hello I am
+                  👋 Hello, I'm
                 </span>
                 <motion.h1 
                   variants={itemVariants}

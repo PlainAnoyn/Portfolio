@@ -2632,18 +2632,24 @@ a.cursor-target,
   cursor: none !important;
 }
 
-/* Hide default cursor on body when TargetCursor is active */
-body {
-  cursor: none;
+/* Hide default cursor on body when TargetCursor is active (desktop only) */
+@media (hover: hover) and (pointer: fine) {
+  body {
+    cursor: none;
+  }
 }
 
 /* Show default cursor on mobile/touch devices */
 @media (hover: none) and (pointer: coarse) {
   body {
-    cursor: auto;
+    cursor: auto !important;
   }
   
-  .cursor-target {
+  .cursor-target,
+  button.cursor-target,
+  a.cursor-target,
+  .nav-link.cursor-target,
+  .navbar-brand.cursor-target {
     cursor: auto !important;
   }
 }

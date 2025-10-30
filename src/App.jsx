@@ -1161,12 +1161,25 @@ function App() {
     };
   }, []);
 
+  // Detect if device has touch (mobile/tablet)
+  const [isTouchDevice, setIsTouchDevice] = React.useState(false);
+  
+  React.useEffect(() => {
+    // Check if device supports touch or has coarse pointer (mobile)
+    const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    const hasCoarsePointer = window.matchMedia('(pointer: coarse)').matches;
+    setIsTouchDevice(hasTouch || hasCoarsePointer);
+  }, []);
+
   return (
     <div className="App">
-      <TargetCursor 
-        spinDuration={2}
-        hideDefaultCursor={true}
-      />
+      {/* Only show custom cursor on desktop */}
+      {!isTouchDevice && (
+        <TargetCursor 
+          spinDuration={2}
+          hideDefaultCursor={true}
+        />
+      )}
 
       {ThreeBackground}
       <div className="content">
