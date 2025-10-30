@@ -74,9 +74,9 @@ function ImageCarousel({ images, alt, fit = 'cover' }) {
 const Projects = () => {
   const projects = [
     {
-      title: 'E-Commerce Platform',
-      description: 'A full-stack e-commerce platform built with React, Node.js, and MongoDB. Features include user authentication, payment processing, and admin dashboard.',
-      technologies: ['React', 'Node.js', 'MongoDB', 'Stripe'],
+      title: 'CozyPlates - Recipe Sharing Platform',
+      description: 'A full-stack recipe sharing website where users can post, share, like, and comment on recipes. Features comprehensive user authentication, personalized profiles, admin dashboard for content management, and a vibrant community for food enthusiasts to connect and share culinary experiences.',
+      technologies: ['React', 'Next.js', 'Node.js', 'MongoDB'],
       images: [
         '/projects/CozyPlates/cozyplate.png',
         '/projects/CozyPlates/Cozy plates 2.png',
@@ -88,9 +88,9 @@ const Projects = () => {
       color: '#667eea',
     },
     {
-      title: '3D Portfolio Website',
-      description: 'An interactive portfolio website featuring Three.js animations and immersive 3D experiences. Custom shaders and particle systems.',
-      technologies: ['Three.js', 'React', 'WebGL', 'GSAP'],
+      title: 'ItsMart - Shopping Mobile App',
+      description: 'A comprehensive shopping mobile application connecting local stores with customers. Store owners can register, manage inventory, and sell products online. Users enjoy seamless browsing, secure checkout, order tracking, and personalized shopping experiences. Built for both iOS and Android platforms.',
+      technologies: ['React Native', 'MongoDB', 'Node.js', 'Express'],
       images: [
         '/projects/DamiChha/1761751757578.jpg',
         '/projects/DamiChha/1761751757593.jpg',
@@ -104,9 +104,9 @@ const Projects = () => {
       color: '#764ba2',
     },
     {
-      title: 'AI Chat Application',
-      description: 'A real-time chat application with AI-powered responses. Built with React, Socket.io, and OpenAI API integration.',
-      technologies: ['React', 'Socket.io', 'OpenAI', 'Express'],
+      title: 'PathFinder - Puzzle Game',
+      description: 'An engaging puzzle game that challenges players to connect numbers in sequence to complete intricate pathways. Features multiple difficulty levels, progressive puzzles, score tracking, and smooth animations. Players strategize to find the optimal path while racing against time or aiming for the perfect solution.',
+      technologies: ['React', 'Firebase', 'JavaScript', 'CSS3'],
       images: [
         '/projects/PathFinder/Screenshot from 2025-10-29 20-39-34.png',
         '/projects/PathFinder/Screenshot from 2025-10-29 20-39-44.png',
@@ -118,9 +118,9 @@ const Projects = () => {
       color: '#f093fb',
     },
     {
-      title: 'Task Management App',
-      description: 'A collaborative task management application with real-time updates, drag-and-drop functionality, and team collaboration features.',
-      technologies: ['React', 'Firebase', 'DnD Kit', 'Tailwind'],
+      title: 'Shangrila - Software Company Website',
+      description: 'A professional corporate website for Shangrila Software Company showcasing their services, portfolio, and expertise. Features responsive design, service highlights, client testimonials, contact forms, and an elegant presentation of the company\'s software solutions and development capabilities.',
+      technologies: ['React', 'Bootstrap', 'CSS3', 'JavaScript'],
       images: [
         '/projects/Shangrila/Screenshot from 2025-10-29 20-53-57.png',
         '/projects/Shangrila/Screenshot from 2025-10-29 20-54-10.png',
