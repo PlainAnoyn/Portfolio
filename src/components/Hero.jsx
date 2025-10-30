@@ -256,7 +256,7 @@ const Hero = () => {
           {/* Three.js Canvas with 3D Model */}
           <motion.div 
             variants={itemVariants}
-            className="col-lg-6 col-md-12"
+            className="col-lg-6 col-md-12 d-none d-lg-block"
             data-aos="fade-left" 
             data-aos-delay="600"
             data-aos-duration="1200"
@@ -281,23 +281,24 @@ const Hero = () => {
         {/* Stats Section - Centered Below Both */}
         <motion.div 
           variants={itemVariants}
-          className="row justify-content-center mt-3"
+          className="row justify-content-center mt-3 mt-md-5"
           data-aos="fade-up" 
           data-aos-delay="1200"
           data-aos-duration="1000"
+          style={{ position: 'relative', zIndex: 10 }}
         >
-          <div className="col-lg-8 col-md-10">
-            <div className="row g-4">
+          <div className="col-lg-8 col-md-10 col-12">
+            <div className="row g-3 g-md-4">
               {statsArray.map((stat, index) => (
-                <div key={stat.label} className="col-md-4">
+                <div key={stat.label} className="col-4 col-md-4">
                   <div 
-                    className="text-center p-4 rounded glass-effect"
+                    className="text-center p-3 p-md-4 rounded glass-effect"
                     data-aos="zoom-in" 
                     data-aos-delay={1400 + (index * 200)}
                     data-aos-duration="800"
                   >
                     <div className="display-6 fw-bold gradient-text mb-2">{stat.value}+</div>
-                    <div className="text-gray-400 fw-medium">{stat.label}</div>
+                    <div className="text-gray-400 fw-medium small">{stat.label}</div>
                   </div>
                 </div>
               ))}
