@@ -1161,14 +1161,14 @@ function App() {
     };
   }, []);
 
-  // Detect if device has touch (mobile/tablet)
+  // Detect if device is ONLY touch (true mobile/tablet), not desktop with touch screen
   const [isTouchDevice, setIsTouchDevice] = React.useState(false);
   
   React.useEffect(() => {
-    // Check if device supports touch or has coarse pointer (mobile)
-    const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    const hasCoarsePointer = window.matchMedia('(pointer: coarse)').matches;
-    setIsTouchDevice(hasTouch || hasCoarsePointer);
+    // Only disable cursor on devices with ONLY coarse pointer (actual mobile/tablet)
+    // This allows desktop browsers (even when resized to mobile width) to still show cursor
+    const isOnlyTouch = window.matchMedia('(pointer: coarse)').matches;
+    setIsTouchDevice(isOnlyTouch);
   }, []);
 
   return (
